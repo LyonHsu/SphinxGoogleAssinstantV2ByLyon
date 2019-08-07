@@ -42,17 +42,17 @@ public class CapTechSphinxManager implements RecognitionListener {
         void onActivationPhraseDetected();
     }
 
-    private static final String ACTIVATION_KEYPHRASE = "hey google";
+    private static final String ACTIVATION_KEYPHRASE = "hey glenda"; //glenda ???? G L EH N D AH
     private static final String WAKEUP_SEARCH = "wakeup";
 
     private final SphinxListener mSphinxListener;
+    Context context;
 
-
-    private SpeechRecognizer mSpeechRecognizer;
+    private LyonSpeechRecognizer mSpeechRecognizer;
 
     public CapTechSphinxManager(Context context, SphinxListener mSphinxListener) {
         this.mSphinxListener = mSphinxListener;
-
+        this.context=context;
         new AsyncTask<Void, Void, Exception>() {
             @Override
             protected Exception doInBackground(Void... params) {
@@ -60,10 +60,10 @@ public class CapTechSphinxManager implements RecognitionListener {
                     Assets assets = new Assets(context);
                     File assetsDir = assets.syncAssets();
 
-                    mSpeechRecognizer = SpeechRecognizerSetup.defaultSetup()
+                    mSpeechRecognizer = (LyonSpeechRecognizer) LyonSpeechRecognizerSetup.defaultSetup()
                             .setAcousticModel(new File(assetsDir, "en-us-ptm"))
                             .setDictionary(new File(assetsDir, "cmudict-en-us.dict"))
-                            .getRecognizer();
+                            .getRecognizer(context);
 
                     mSpeechRecognizer.addListener(CapTechSphinxManager.this);
 

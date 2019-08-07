@@ -129,11 +129,11 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
         AudioDeviceInfo audioInputDevice = null;
         AudioDeviceInfo audioOutputDevice = null;
         if (USE_VOICEHAT_I2S_DAC) {
-            audioInputDevice = findAudioDevice(AudioManager.GET_DEVICES_INPUTS, AudioDeviceInfo.TYPE_USB_DEVICE);
+            audioInputDevice = findAudioDevice(AudioManager.GET_DEVICES_INPUTS, AudioDeviceInfo.TYPE_BUS);
             if (audioInputDevice == null) {
                 Log.e(TAG, "failed to find I2S audio input device, using default");
             }
-            audioOutputDevice = findAudioDevice(AudioManager.GET_DEVICES_OUTPUTS, AudioDeviceInfo.TYPE_USB_DEVICE);
+            audioOutputDevice = findAudioDevice(AudioManager.GET_DEVICES_OUTPUTS, AudioDeviceInfo.TYPE_BUS);
             if (audioOutputDevice == null) {
                 Log.e(TAG, "failed to found I2S audio output device, using default");
             }

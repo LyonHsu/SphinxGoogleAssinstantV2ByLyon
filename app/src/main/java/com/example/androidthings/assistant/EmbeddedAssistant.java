@@ -16,6 +16,7 @@
 
 package com.example.androidthings.assistant;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.media.AudioDeviceInfo;
 import android.media.AudioFormat;

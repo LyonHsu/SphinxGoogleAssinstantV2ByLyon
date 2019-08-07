@@ -19,17 +19,32 @@ back the Assistant's spoken response on the connected speaker.
   1. Download `client_secret_XXXX.json`
 1. Install the [`google-oauthlib-tool`](https://github.com/GoogleCloudPlatform/google-auth-library-python-oauthlib) in a [Python 3](https://www.python.org/downloads/) virtual environment:
 
+Google Install the SDK and Sample Code:
+https://developers.google.com/assistant/sdk/guides/library/python/embed/install-sample
+
+(Recommended) For Python 3:
 ```
+sudo apt-get update
+sudo apt-get install python3-dev python3-venv
 python3 -m venv env
-env/bin/python -m pip install --upgrade pip setuptools
-env/bin/pip install --upgrade google-auth-oauthlib[tool]
+env/bin/python -m pip install --upgrade pip setuptools wheel
+source env/bin/activate
+```
+
+
+For Python 2.7:
+```
+sudo apt-get update
+sudo apt-get install python-dev python-virtualenv
+virtualenv env --no-site-packages
+env/bin/python -m pip install --upgrade pip setuptools wheel
 source env/bin/activate
 ```
 
 - Use the [`google-oauthlib-tool`][google-oauthlib-tool] to generate user credentials:
 
-```bash
-google-oauthlib-tool --client-secrets client_secret_XXXX.json \
+```
+python env/bin/google-oauthlib-tool --client-secrets client_secret_aiy.json \
                      --credentials app/src/main/res/raw/credentials.json \
                      --scope https://www.googleapis.com/auth/assistant-sdk-prototype \
                      --save
@@ -141,6 +156,11 @@ add the following `intent-filter` to the app's manifest file:
 
 </activity>
 ```
+
+安卓平台使用pocketSphinx离线语音识别：
+https://www.bbsmax.com/A/gVdnYDv75W/
+
+
 
 ## License
 

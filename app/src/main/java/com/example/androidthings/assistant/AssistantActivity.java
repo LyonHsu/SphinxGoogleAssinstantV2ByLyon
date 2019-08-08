@@ -434,6 +434,7 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
                             Thread.sleep(200);
                             mLed.setValue(false);
                             Log.e(TAG, "mLed == off");
+                            Thread.sleep(200);
                         } catch (IOException e) {
                             Log.e(TAG,"Led IOException:"+e);
                         } catch (InterruptedException e) {

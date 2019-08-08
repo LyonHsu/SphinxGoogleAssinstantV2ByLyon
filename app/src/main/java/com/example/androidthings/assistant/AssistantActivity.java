@@ -89,6 +89,7 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
     //Sphinx
     //pocket sphinx for hot key
     private CapTechSphinxManager captechSphinxManager;
+    boolean LEDShining = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -332,6 +333,10 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
 
         //instantiate PSphinx
         captechSphinxManager = new CapTechSphinxManager(this, this);
+        LEDShining = true;
+
+        // TODO打開一盞燈！
+        LEDShining();
     }
 
     private AudioDeviceInfo findAudioDevice(int deviceFlag, int deviceType) {
@@ -400,8 +405,8 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
         //讓我們的Sphinx Manager知道我們想要聽短語
         captechSphinxManager.startListeningToActivationPhrase();
         //lets show a blue light to indicate we are ready.
-        // TODO打開一盞燈！
-        LEDShining();
+//        playDing(this);
+        LEDShining=false;
 
     }
 
@@ -427,7 +432,7 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
                 @Override
                 public void run() {
                     int i=0;
-                    while (i<3){
+                    while (LEDShining){
                         try {
                             mLed.setValue(true);
                             Log.e(TAG, "mLed == on");

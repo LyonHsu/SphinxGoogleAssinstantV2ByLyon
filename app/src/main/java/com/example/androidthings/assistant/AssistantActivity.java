@@ -401,6 +401,15 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
         captechSphinxManager.startListeningToActivationPhrase();
         //lets show a blue light to indicate we are ready.
         // TODO打開一盞燈！
+        LEDShining();
+
+    }
+
+    @Override
+    public void onActivationPhraseDetected() {
+        // TODO開始我們的助理請求
+        Log.d(TAG, "Activation Phrase Detected");
+        mEmbeddedAssistant.startConversation();
         if (mLed != null) {
             try {
                 mLed.setValue(true);
@@ -410,10 +419,33 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
         }
     }
 
-    @Override
-    public void onActivationPhraseDetected() {
-        // TODO開始我們的助理請求
-        Log.d(TAG, "Activation Phrase Detected");
-        mEmbeddedAssistant.startConversation();
+    private void LEDShining(){
+        Log.e(TAG, "mLed LEDShining");
+
+        if(mLed!=null){
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    int i=0;
+                    while (i<3){
+                        try {
+                            mLed.setValue(true);
+                            Log.e(TAG, "mLed == on");
+                            Thread.sleep(200);
+                            mLed.setValue(false);
+                            Log.e(TAG, "mLed == off");
+                        } catch (IOException e) {
+                            Log.e(TAG,"Led IOException:"+e);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        i++;
+                    }
+                }
+            }).start();
+        }else{
+            Log.e(TAG, "mLed == null");
+        }
     }
+
 }

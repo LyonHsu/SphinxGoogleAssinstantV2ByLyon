@@ -122,6 +122,9 @@ public class WifiSetting {
         newWifiConfiguration.allowedPairwiseCiphers.clear();
         newWifiConfiguration.allowedProtocols.clear();
         newWifiConfiguration.SSID = "\"" + ssid + "\"";
+        Log.d("createWifiConfiguration","ssid:"+ssid+",password:"+password+",type:"+type);
+        if(type==null)
+            return newWifiConfiguration;
         switch (type) {
             case WIFICIPHER_NOPASS:
                 newWifiConfiguration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);

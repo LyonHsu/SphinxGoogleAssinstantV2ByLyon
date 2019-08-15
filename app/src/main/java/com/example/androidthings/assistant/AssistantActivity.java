@@ -368,15 +368,14 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
     public void onButtonEvent(Button button, boolean pressed) {
         try {
             if (mLed != null) {
-                LEDShining = true;
-
-                // TODO打開一盞燈！
-                LEDShining();
+                mLed.setValue(true);
+                Log.e(TAG, "mLed == on");
             }
         } catch (Exception e) {
             Log.d(TAG, "error toggling LED:", e);
         }
         if (pressed) {
+            captechSphinxManager.SpeechRecognizerStop();
             mEmbeddedAssistant.startConversation();
         }
     }
@@ -453,7 +452,7 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
                         try {
                             mLed.setValue(true);
                             Log.e(TAG, "mLed == on");
-                            Thread.sleep(200);
+                            Thread.sleep(250);
                             mLed.setValue(false);
                             Log.e(TAG, "mLed == off");
                             Thread.sleep(200);

@@ -38,6 +38,7 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ListView;
 import com.example.androidthings.assistant.EmbeddedAssistant.ConversationCallback;
 import com.example.androidthings.assistant.EmbeddedAssistant.RequestCallback;
+import com.example.androidthings.assistant.NetWork.NetWork;
 import com.example.androidthings.assistant.Sphinx.CapTechSphinxManager;
 import com.google.android.things.contrib.driver.button.Button;
 import com.google.android.things.contrib.driver.voicehat.Max98357A;
@@ -91,6 +92,9 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
     private CapTechSphinxManager captechSphinxManager;
     boolean LEDShining = false;
 
+    //NetWork
+    NetWork netWork;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -115,6 +119,8 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
         });
         mWebView = findViewById(R.id.webview);
         mWebView.getSettings().setJavaScriptEnabled(true);
+
+        netWork = (NetWork)findViewById(R.id.network);
 
         mMainHandler = new Handler(getMainLooper());
         mButtonWidget = findViewById(R.id.assistantQueryButton);
@@ -239,6 +245,7 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
                         if (mLed != null) {
                             try {
                                 mLed.setValue(false);
+                                LEDShining=false;
                             } catch (IOException e) {
                                 Log.e(TAG, "cannot turn off LED", e);
                             }
@@ -309,23 +316,23 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
                     }
 
                     public void onDeviceAction(String intentName, JSONObject parameters) {
-                        if (parameters != null) {
-                            Log.d(TAG, "Get device action " + intentName + " with parameters: " +
-                                parameters.toString());
-                        } else {
-                            Log.d(TAG, "Get device action " + intentName + " with no paramete"
-                                + "rs");
-                        }
-                        if (intentName.equals("action.devices.commands.OnOff")) {
-                            try {
-                                boolean turnOn = parameters.getBoolean("on");
-                                mLed.setValue(turnOn);
-                            } catch (JSONException e) {
-                                Log.e(TAG, "Cannot get value of command", e);
-                            } catch (IOException e) {
-                                Log.e(TAG, "Cannot set value of LED", e);
-                            }
-                        }
+//                        if (parameters != null) {
+//                            Log.d(TAG, "Get device action " + intentName + " with parameters: " +
+//                                parameters.toString());
+//                        } else {
+//                            Log.d(TAG, "Get device action " + intentName + " with no paramete"
+//                                + "rs");
+//                        }
+//                        if (intentName.equals("action.devices.commands.OnOff")) {
+//                            try {
+//                                boolean turnOn = parameters.getBoolean("on");
+//                                mLed.setValue(turnOn);
+//                            } catch (JSONException e) {
+//                                Log.e(TAG, "Cannot get value of command", e);
+//                            } catch (IOException e) {
+//                                Log.e(TAG, "Cannot set value of LED", e);
+//                            }
+//                        }
                     }
                 })
                 .build();
@@ -337,6 +344,13 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
 
         // TODO打開一盞燈！
         LEDShining();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(netWork!=null)
+            netWork.onResume();
     }
 
     private AudioDeviceInfo findAudioDevice(int deviceFlag, int deviceType) {
@@ -354,9 +368,12 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
     public void onButtonEvent(Button button, boolean pressed) {
         try {
             if (mLed != null) {
-                mLed.setValue(pressed);
+                LEDShining = true;
+
+                // TODO打開一盞燈！
+                LEDShining();
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             Log.d(TAG, "error toggling LED:", e);
         }
         if (pressed) {

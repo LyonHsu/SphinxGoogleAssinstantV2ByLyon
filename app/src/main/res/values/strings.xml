@@ -19,4 +19,14 @@
   <string name="button_new_request">New Request</string>
   <string name="button_retry">Retry</string>
   <string name="button_listening">Listening</string>
+
+    <!--Wifi NetWork-->
+    <string name="wifistatus">Ｗifi Status：</string>
+    <string name="wifiname">Wifi Name(SSID)：</string>
+    <string name="wifipassword">Wifi PASSWD(PASSWD)：</string>
+    <string name="wifishowpassword">Show PASSWD(SHOWPW)：</string>
+    <string name="wifisecuritytype">(TYPE)：</string>
+    <string name="wificonnect">(CONNECT)</string>
+    <string name="wifititle">wifi connect error</string>
+    <string name="wifioffmassage">本功能需開啟無線網路才可進行下一步設定, 請確認是否要開啟無線網路?\n(Is turn on the wifi ?)</string>
 </resources>

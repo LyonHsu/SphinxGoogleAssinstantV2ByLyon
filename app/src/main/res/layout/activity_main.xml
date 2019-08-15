@@ -26,6 +26,11 @@
     android:paddingRight="16dp"
     android:paddingTop="16dp"
     tools:context=".AssistantActivity">
+    <com.example.androidthings.assistant.NetWork.NetWork
+        android:id="@+id/network"
+        android:layout_width="match_parent"
+        android:layout_height="100dp">
+    </com.example.androidthings.assistant.NetWork.NetWork>
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"

@@ -26,6 +26,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.speech.tts.TextToSpeech;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
@@ -40,6 +41,7 @@ import com.example.androidthings.assistant.EmbeddedAssistant.ConversationCallbac
 import com.example.androidthings.assistant.EmbeddedAssistant.RequestCallback;
 import com.example.androidthings.assistant.NetWork.NetWork;
 import com.example.androidthings.assistant.Sphinx.CapTechSphinxManager;
+import com.example.androidthings.assistant.TextToSpeech.LyonTextToSpeech;
 import com.google.android.things.contrib.driver.button.Button;
 import com.google.android.things.contrib.driver.voicehat.Max98357A;
 import com.google.android.things.contrib.driver.voicehat.VoiceHat;
@@ -51,8 +53,12 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+
 import org.json.JSONException;
 import org.json.JSONObject;
+
+
 
 public class AssistantActivity extends Activity implements Button.OnButtonEventListener, CapTechSphinxManager.SphinxListener {
     private static final String TAG = AssistantActivity.class.getSimpleName();
@@ -95,12 +101,19 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
     //NetWork
     NetWork netWork;
 
+    //Is Use Google AIY Device
+    boolean isGoogleAIY = false;
+
+    LyonTextToSpeech lyonTextToSpeech;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.i(TAG, "starting assistant demo");
 
         setContentView(R.layout.activity_main);
+
+        lyonTextToSpeech = new LyonTextToSpeech(this);
 
         final ListView assistantRequestsListView = findViewById(R.id.assistantRequestsListView);
         mAssistantRequestsAdapter =
@@ -126,24 +139,35 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
         mButtonWidget = findViewById(R.id.assistantQueryButton);
         mButtonWidget.setOnClickListener(new OnClickListener() {
             @Override
-            public void onClick(View view) {
+            public void onClick(View view)
+            {
+                captechSphinxManager.SpeechRecognizerStop();
                 mEmbeddedAssistant.startConversation();
             }
         });
 
+        lyonTextToSpeech.textToSpeech("正在開機");
 
         // Audio routing configuration: use default routing.
         AudioDeviceInfo audioInputDevice = null;
         AudioDeviceInfo audioOutputDevice = null;
         if (USE_VOICEHAT_I2S_DAC) {
-            audioInputDevice = findAudioDevice(AudioManager.GET_DEVICES_INPUTS, AudioDeviceInfo.TYPE_BUS);
-            if (audioInputDevice == null) {
-                Log.e(TAG, "failed to find I2S audio input device, using default");
-            }
+            if(isGoogleAIY){
+                audioInputDevice = findAudioDevice(AudioManager.GET_DEVICES_INPUTS, AudioDeviceInfo.TYPE_BUS);//TYPE_USB_DEVICE ,TYPE_BUS
+                if (audioInputDevice == null) {
+                    Log.e(TAG, "failed to find I2S audio input device, using default");
+                }
             audioOutputDevice = findAudioDevice(AudioManager.GET_DEVICES_OUTPUTS, AudioDeviceInfo.TYPE_BUS);
-            if (audioOutputDevice == null) {
-                Log.e(TAG, "failed to found I2S audio output device, using default");
+                if (audioOutputDevice == null) {
+                    Log.e(TAG, "failed to found I2S audio output device, using default");
+                }
+            }else{
+                audioInputDevice = findAudioDevice(AudioManager.GET_DEVICES_INPUTS, AudioDeviceInfo.TYPE_USB_DEVICE);
+                if (audioInputDevice == null) {
+                    Log.e(TAG, "failed to find I2S audio input device, using default");
+                }
             }
+
         }
 
         try {
@@ -405,6 +429,8 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
                 mDac.close();
             } catch (IOException e) {
                 Log.w(TAG, "error closing voice hat trigger", e);
+            } catch (NullPointerException e){
+                Log.w(TAG, "error closing voice hat trigger", e);
             }
             mDac = null;
         }
@@ -423,7 +449,7 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
         //lets show a blue light to indicate we are ready.
 //        playDing(this);
         LEDShining=false;
-
+        lyonTextToSpeech.textToSpeech("開機完畢 你可以使用 "+captechSphinxManager.getHotKeyWord()+" 來喚醒");
     }
 
     @Override

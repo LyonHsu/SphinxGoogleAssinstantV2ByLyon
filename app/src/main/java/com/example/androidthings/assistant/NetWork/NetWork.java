@@ -1,9 +1,11 @@
 package com.example.androidthings.assistant.NetWork;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -14,6 +16,10 @@ import android.widget.TextView;
 import com.example.androidthings.assistant.NetWork.WifiSetting.WifiMenu;
 import com.example.androidthings.assistant.R;
 
+/*
+adb shell am start -n  com.example.androidthings.assistant/.AssistantActivity
+adb shell am start -n  com.android.iotlauncher/.DefaultIoTLauncher
+ */
 
 public class NetWork extends RelativeLayout {
     String TAG = NetWork.class.getSimpleName();
@@ -61,9 +67,11 @@ public class NetWork extends RelativeLayout {
             @Override
             public void onClick(View view) {
 //                Toast.makeText(context,"NetWork onClick!",Toast.LENGTH_LONG).show();
-//                Log.e(TAG,"NetWork onClick!");
+                Log.e(TAG,"NetWork onClick!");
                 Intent intent = new Intent(context, WifiMenu.class);
                 context.startActivity(intent);
+//               1
+                Log.e(TAG,"ACTION_SETTINGS");
             }
         });
     }

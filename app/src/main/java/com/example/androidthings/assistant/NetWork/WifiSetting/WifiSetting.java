@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.text.TextUtils;
 import android.util.Log;
@@ -59,14 +60,35 @@ public class WifiSetting {
         //mWifiConfigurationList = wifiManager.getConfiguredNetworks();
         //目前已連線的Wi-Fi資訊
         //mWifiInfo = wifiManager.getConnectionInfo();
-
+        WifiInfo wifiInf = wifiManager.getConnectionInfo();
+        String ssid = wifiInf.getSSID().toString();
+        ArrayList<ScanResult> wifiSSId = new ArrayList<>();
+        ScanResult choweScanResult = null;
         for (int i = 0; i < mWifiScanResultList.size(); i++) {
             //手機目前周圍的Wi-Fi環境
-            Log.v("TAG", "SSID = " + mWifiScanResultList.get(i).SSID + "強度 = " + mWifiScanResultList.get(i).level);
-            wifilist.add(mWifiScanResultList.get(i).SSID.toString());
+            Log.v("TAG", "SSID = " + mWifiScanResultList.get(i).SSID + ",強度 = " + mWifiScanResultList.get(i).level);
+            String wifiSSID = mWifiScanResultList.get(i).SSID.toString();
+            if(ssid!=null) {
+                if (ssid.contains(wifiSSID)) {
+                    choweScanResult = mWifiScanResultList.get(i);
+                } else {
+                    wifiSSId.add(mWifiScanResultList.get(i));
+                }
+            }else
+                wifilist.add(mWifiScanResultList.get(i).SSID.toString());
 //            SSID (Wi-Fi名稱) = mWifiScanResultList.get(i).SSID ;
 //            LEVEL (Wi-Fi訊號強弱) = mWifiScanResultList.get(i).level);
         }
+        if(wifiSSId.size()>0){
+            mWifiScanResultList = new ArrayList<>();
+            if(choweScanResult!=null)
+                mWifiScanResultList.add(choweScanResult);
+            for(int i=0;i<wifiSSId.size();i++){
+                mWifiScanResultList.add(wifiSSId.get(i));
+            }
+        }
+
+
         return mWifiScanResultList;
 //        for(int i = 0 ; i < mWifiConfigurationList.size() ; i++ )
 //        {

@@ -30,7 +30,10 @@ import android.widget.Toast;
 import com.example.androidthings.assistant.NetWork.tool.Alert;
 import com.example.androidthings.assistant.NetWork.tool.Permission;
 import com.example.androidthings.assistant.R;
+import com.google.protobuf.Internal;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 
@@ -55,7 +58,7 @@ public class WifiMenu extends Activity {
     ProgressDialog progressDialog;
     final int GETIP=1;
     final int SHOW_IP_ADDRESS=2;
-
+    List<ScanResult> list = new ArrayList<>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -83,9 +86,11 @@ public class WifiMenu extends Activity {
             @Override
             public void onClick(View view) {
                 if(wifiSetting!=null) {
-                    wifiSetting.wifiscan();
-                    if (mAdapter != null)
+                    list = new ArrayList<>();
+                    list = wifiSetting.wifiscan();
+                    if (mAdapter != null) {
                         mAdapter.notifyDataSetChanged();
+                    }
                 }
             }
         });
@@ -180,7 +185,7 @@ public class WifiMenu extends Activity {
         Log.d(TAG,"checkWifiPermissionStatus()");
         Permission permission = new Permission();
         if (permission.checBluetoothPermission(WifiMenu.this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION})) {
-            List<ScanResult> list = wifiSetting.wifiscan();
+            list = wifiSetting.wifiscan();
             Log.d(TAG,"checkWifiPermissionStatus wifi scan num:"+list.size());
             mAdapter = new RecyclerAdapter(list);//这里的getyourDatas()返回的是String类型的数组
             Recycler.setAdapter(mAdapter);

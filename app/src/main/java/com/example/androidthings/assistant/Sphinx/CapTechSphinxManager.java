@@ -42,13 +42,17 @@ public class CapTechSphinxManager implements RecognitionListener {
         void onActivationPhraseDetected();
     }
 
-    private static final String ACTIVATION_KEYPHRASE = "hey lisa"; //glenda ???? G L EH N D AH
+    private static final String ACTIVATION_KEYPHRASE = "hey glenda"; //glenda ???? G L EH N D AH
     private static final String WAKEUP_SEARCH = "wakeup";
 
     private final SphinxListener mSphinxListener;
     Context context;
 
     private LyonSpeechRecognizer mSpeechRecognizer;
+
+    public String getHotKeyWord(){
+        return ACTIVATION_KEYPHRASE;
+    }
 
     public CapTechSphinxManager(Context context, SphinxListener mSphinxListener) {
         this.mSphinxListener = mSphinxListener;

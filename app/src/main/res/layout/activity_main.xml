@@ -42,12 +42,14 @@
             android:layout_height="wrap_content"
             android:text="@string/button_new_request"
             android:layout_centerHorizontal="true"
+            android:background="@drawable/btn_blue"
             android:id="@+id/assistantQueryButton" />
         <CheckBox
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="32dp"
             android:id="@+id/htmlOutput"
+            android:background="@drawable/btn_blue"
             android:text="HTML Output"/>
     </LinearLayout>
 

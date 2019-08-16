@@ -3,6 +3,8 @@ package com.example.androidthings.assistant.NetWork;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.provider.Settings;
@@ -26,7 +28,7 @@ public class NetWork extends RelativeLayout {
     Context context ;
     View view;
     ImageView netWorkIcon;
-    TextView SSIDTxt,IPTxt;
+    TextView SSIDTxt,IPTxt,networkTxt;
 
 
     public void onResume(){
@@ -61,6 +63,8 @@ public class NetWork extends RelativeLayout {
         netWorkIcon = (ImageView)view.findViewById(R.id.netWorkIcon);
         SSIDTxt = (TextView)view.findViewById(R.id.SSIDTxt);
         IPTxt = (TextView)view.findViewById(R.id.IPTxt);
+        networkTxt = (TextView)view.findViewById(R.id.networkTxt);
+        networkTxt.setText("Network:"+"    ver:"+getAppVersionName(context)+" "+getAppVersion(context));
         addView(view);
         getLocalIpAddress(context);
         setOnClickListener(new OnClickListener() {
@@ -101,5 +105,26 @@ public class NetWork extends RelativeLayout {
         return "Wifi:"+ip+"\n ("+wifiInf.getSSID().toString()+") connected\n"+wifiInf.getBSSID();
     }
 
+    private static String getAppVersionName(Context context) {
+        try {
+            PackageInfo packageInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+            return packageInfo.versionName;
+        } catch (PackageManager.NameNotFoundException e) {
+            // should never happen
+//            throw new RuntimeException(TAG+" Could not get package name: " + e);
+            return "Could not get VersionName";
+        }
+    }
+
+    private static int getAppVersion(Context context) {
+        try {
+            PackageInfo packageInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+            return packageInfo.versionCode;
+        } catch (PackageManager.NameNotFoundException e) {
+            // should never happen
+//            throw new RuntimeException("Could not get package name: " + e);
+            return -1;
+        }
+    }
 
 }

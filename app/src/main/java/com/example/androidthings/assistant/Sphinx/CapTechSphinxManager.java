@@ -159,7 +159,7 @@ public class CapTechSphinxManager implements RecognitionListener {
      * To be called for by the Assistant Activity.
      */
     public void startListeningToActivationPhrase() {
-        Log.e(TAG,"sphinx startListeningToActivationPhrase():");
+        Log.e(TAG,"sphinx start Listening To Activation Phrase():");
         mSpeechRecognizer.startListening(WAKEUP_SEARCH);
     }
 

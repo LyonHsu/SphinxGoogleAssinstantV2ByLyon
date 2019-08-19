@@ -11,15 +11,16 @@ import java.util.Locale;
 
 public class LyonTextToSpeech  {
     String TAG = LyonTextToSpeech.class.getSimpleName();
-    private TextToSpeech textToSpeech;
+    private static TextToSpeech textToSpeech;
     Context context;
 
     public LyonTextToSpeech(Context context){
         this.context=context;
+        textToSpeech=getTextToSpeech();
     }
 
-    public void textToSpeech(String sss){
-        TextToSpeech textToSpeech =  getTextToSpeech();
+    public void speak(String sss){
+         textToSpeech =  getTextToSpeech();
         String TAGG = "LyonTextToSpeech "+TAG;
         if(textToSpeech==null)
         {
@@ -66,9 +67,10 @@ public class LyonTextToSpeech  {
                     Log.d(TAG, "getTextToSpeech TTS init status:" + status);
                     if (status != TextToSpeech.ERROR) {
 //                        int result = textToSpeech.setLanguage(Locale.getDefault());//Locale.);
-                        int result = textToSpeech.setLanguage(Locale.getDefault());
+                        int result = textToSpeech.setLanguage(Locale.TAIWAN);
 
                         Log.d(TAG, "getTextToSpeech speak result init:" + result);
+                        init(status);
                     }
                 }
             });
@@ -76,7 +78,7 @@ public class LyonTextToSpeech  {
         return textToSpeech;
     }
 
-    private ArrayList<HashMap<String,String>> getEngorChingString(String s){
+    public ArrayList<HashMap<String,String>> getEngorChingString(String s){
         Log.d(TAG,"20190605 string:"+s);
         HashMap<String,String> hashMap = new HashMap<>();
         ArrayList<HashMap<String,String>> arrayList = new ArrayList<>();
@@ -118,5 +120,14 @@ public class LyonTextToSpeech  {
         }
 
         return arrayList;
+    }
+
+    public void init(int status){
+
+    }
+
+    public static void pause() {
+        textToSpeech.stop();
+        textToSpeech.shutdown();
     }
 }

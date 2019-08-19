@@ -43,24 +43,29 @@ import android.widget.Toast;
 import com.example.androidthings.assistant.EmbeddedAssistant.ConversationCallback;
 import com.example.androidthings.assistant.EmbeddedAssistant.RequestCallback;
 import com.example.androidthings.assistant.NetWork.NetWork;
+import com.example.androidthings.assistant.NetWork.WifiSetting.WifiMenu;
+import com.example.androidthings.assistant.NetWork.tool.Alert;
+import com.example.androidthings.assistant.NetWork.tool.Permission;
 import com.example.androidthings.assistant.Sphinx.CapTechSphinxManager;
 import com.example.androidthings.assistant.TextToSpeech.LyonTextToSpeech;
+import com.example.androidthings.assistant.Tool.ToastUtile;
 import com.google.android.things.contrib.driver.button.Button;
 import com.google.android.things.contrib.driver.voicehat.Max98357A;
 import com.google.android.things.contrib.driver.voicehat.VoiceHat;
 import com.google.android.things.pio.Gpio;
-import com.google.android.things.pio.PeripheralManager;
 import com.google.assistant.embedded.v1alpha2.SpeechRecognitionResult;
 import com.google.auth.oauth2.UserCredentials;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.example.androidthings.assistant.Tool.Utils;
 
 
 public class AssistantActivity extends Activity implements Button.OnButtonEventListener, CapTechSphinxManager.SphinxListener {
@@ -107,279 +112,291 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
     //Is Use Google AIY Device
     boolean isGoogleAIY = false;
 
-    LyonTextToSpeech lyonTextToSpeech;
 
     ProgressDialog progressDialog;
-
+    LyonTextToSpeech lyonTextToSpeech;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.i(TAG, "starting assistant demo");
 
-        setContentView(R.layout.activity_main);
-
-        lyonTextToSpeech = new LyonTextToSpeech(this);
-        progressDialog = new ProgressDialog(this);
-        progressDialog.setTitle("init");
-        progressDialog.setMessage("beging....");
-        progressDialog.show();
-        final ListView assistantRequestsListView = findViewById(R.id.assistantRequestsListView);
-        mAssistantRequestsAdapter =
-            new ArrayAdapter<>(this, android.R.layout.simple_list_item_1,
-                mAssistantRequests);
-        assistantRequestsListView.setAdapter(mAssistantRequestsAdapter);
-        mHtmlOutputCheckbox = findViewById(R.id.htmlOutput);
-        mHtmlOutputCheckbox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean useHtml) {
-                if(mEmbeddedAssistant!=null) {
-                    mWebView.setVisibility(useHtml ? View.VISIBLE : View.GONE);
-                    assistantRequestsListView.setVisibility(useHtml ? View.GONE : View.VISIBLE);
-                    mEmbeddedAssistant.setResponseFormat(useHtml
-                            ? EmbeddedAssistant.HTML : EmbeddedAssistant.TEXT);
+        Permission permission = new Permission();
+        if(!permission.checAudioRecordPermission(this)){
+            Alert.showAlert(this, getString(R.string.wifititle), getString(R.string.wifioffmassage), "ok");
+        }else {
+            setContentView(R.layout.activity_main);
+            lyonTextToSpeech = new LyonTextToSpeech(this){
+                @Override
+                public void init(int status) {
+                    super.init(status);
+                    Log.d(TAG,"lyonTextToSpeech init status:"+status);
+                    speak("正在開機");
                 }
-            }
-        });
-        mWebView = findViewById(R.id.webview);
-        mWebView.getSettings().setJavaScriptEnabled(true);
+            };
 
-        netWork = (NetWork)findViewById(R.id.network);
 
-        mMainHandler = new Handler(getMainLooper());
-        mButtonWidget = findViewById(R.id.assistantQueryButton);
-        mButtonWidget.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view)
-            {
-                if(mEmbeddedAssistant!=null) {
-                    captechSphinxManager.SpeechRecognizerStop();
-                    mEmbeddedAssistant.startConversation();
+            progressDialog = new ProgressDialog(this);
+            progressDialog.setTitle("init");
+            progressDialog.setMessage("beging....");
+            progressDialog.show();
+            final ListView assistantRequestsListView = findViewById(R.id.assistantRequestsListView);
+            mAssistantRequestsAdapter =
+                    new ArrayAdapter<>(this, android.R.layout.simple_list_item_1,
+                            mAssistantRequests);
+            assistantRequestsListView.setAdapter(mAssistantRequestsAdapter);
+            mHtmlOutputCheckbox = findViewById(R.id.htmlOutput);
+            mHtmlOutputCheckbox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton compoundButton, boolean useHtml) {
+                    if (mEmbeddedAssistant != null) {
+                        mWebView.setVisibility(useHtml ? View.VISIBLE : View.GONE);
+                        assistantRequestsListView.setVisibility(useHtml ? View.GONE : View.VISIBLE);
+                        mEmbeddedAssistant.setResponseFormat(useHtml
+                                ? EmbeddedAssistant.HTML : EmbeddedAssistant.TEXT);
+                    }
                 }
-            }
-        });
+            });
+            mWebView = findViewById(R.id.webview);
+            mWebView.getSettings().setJavaScriptEnabled(true);
 
-        lyonTextToSpeech.textToSpeech("正在開機");
+            netWork = (NetWork) findViewById(R.id.network);
 
-        // Audio routing configuration: use default routing.
-        AudioDeviceInfo audioInputDevice = null;
-        AudioDeviceInfo audioOutputDevice = null;
-        if (USE_VOICEHAT_I2S_DAC) {
-            if(isGoogleAIY){
-                audioInputDevice = findAudioDevice(AudioManager.GET_DEVICES_INPUTS, AudioDeviceInfo.TYPE_BUS);//TYPE_USB_DEVICE ,TYPE_BUS
-                if (audioInputDevice == null) {
-                    Log.e(TAG, "failed to find I2S audio input device, using default");
-                }else{
-                    Log.d(TAG, " find USB audio input device, using I2S");
+            mMainHandler = new Handler(getMainLooper());
+            mButtonWidget = findViewById(R.id.assistantQueryButton);
+            mButtonWidget.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (mEmbeddedAssistant != null) {
+                        captechSphinxManager.SpeechRecognizerStop();
+                        mEmbeddedAssistant.startConversation();
+                    }
                 }
-            audioOutputDevice = findAudioDevice(AudioManager.GET_DEVICES_OUTPUTS, AudioDeviceInfo.TYPE_BUS);
-                if (audioOutputDevice == null) {
-                    Log.e(TAG, "failed to found I2S audio output device, using default");
-                }else{
-                    Log.d(TAG, " find USB audio input device, using I2S");
-                }
-            }else{
-                Log.e(TAG, " find USB audio input device, using default");
-                audioInputDevice = findAudioDevice(AudioManager.GET_DEVICES_INPUTS, AudioDeviceInfo.TYPE_USB_DEVICE);
-                if (audioInputDevice == null) {
-                    Log.e(TAG, "failed to find I2S audio input device, using default");
-                }else{
-                    Log.d(TAG, " find USB audio input device, using USB");
-                }
-            }
+            });
 
-        }
 
-        try {
+            // Audio routing configuration: use default routing.
+            AudioDeviceInfo audioInputDevice = null;
+            AudioDeviceInfo audioOutputDevice = null;
             if (USE_VOICEHAT_I2S_DAC) {
-                Log.i(TAG, "initializing DAC trigger");
-                mDac = VoiceHat.openDac();
-                mDac.setSdMode(Max98357A.SD_MODE_SHUTDOWN);
+                if (isGoogleAIY) {
+                    audioInputDevice = findAudioDevice(AudioManager.GET_DEVICES_INPUTS, AudioDeviceInfo.TYPE_BUS);//TYPE_USB_DEVICE ,TYPE_BUS
+                    if (audioInputDevice == null) {
+                        Log.e(TAG, "failed to find I2S audio input device, using default");
+                    } else {
+                        Log.d(TAG, " find USB audio input device, using I2S");
+                    }
+                    audioOutputDevice = findAudioDevice(AudioManager.GET_DEVICES_OUTPUTS, AudioDeviceInfo.TYPE_BUS);
+                    if (audioOutputDevice == null) {
+                        Log.e(TAG, "failed to found I2S audio output device, using default");
+                    } else {
+                        Log.d(TAG, " find USB audio input device, using I2S");
+                    }
+                } else {
+                    Log.e(TAG, " find USB audio input device, using default");
+                    audioInputDevice = findAudioDevice(AudioManager.GET_DEVICES_INPUTS, AudioDeviceInfo.TYPE_USB_DEVICE);
+                    if (audioInputDevice == null) {
+                        Log.e(TAG, "failed to find I2S audio input device, using default");
+                    } else {
+                        Log.d(TAG, " find USB audio input device, using USB");
+                    }
+                }
 
-                mButton = VoiceHat.openButton();
-                mLed = VoiceHat.openLed();
-            } else {
+            }
+
+            try {
+                if (USE_VOICEHAT_I2S_DAC) {
+                    Log.i(TAG, "initializing DAC trigger");
+                    mDac = VoiceHat.openDac();
+                    mDac.setSdMode(Max98357A.SD_MODE_SHUTDOWN);
+
+                    mButton = VoiceHat.openButton();
+                    mLed = VoiceHat.openLed();
+                } else {
 //                PeripheralManager pioManager = PeripheralManager.getInstance();
 //                mButton = new Button(BoardDefaults.getGPIOForButton(),
 //                    Button.LogicState.PRESSED_WHEN_LOW);
 //                mLed = pioManager.openGpio(BoardDefaults.getGPIOForLED());
+                }
+
+                if (mButton != null) {
+                    mButton.setDebounceDelay(BUTTON_DEBOUNCE_DELAY_MS);
+                    mButton.setOnButtonEventListener(this);
+                }
+                if (mLed != null) {
+                    mLed.setDirection(Gpio.DIRECTION_OUT_INITIALLY_LOW);
+                    mLed.setActiveType(Gpio.ACTIVE_HIGH);
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "error configuring peripherals:", e);
+                return;
             }
 
-            if(mButton!=null) {
-                mButton.setDebounceDelay(BUTTON_DEBOUNCE_DELAY_MS);
-                mButton.setOnButtonEventListener(this);
+            // Set volume from preferences
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+            int initVolume = preferences.getInt(PREF_CURRENT_VOLUME, DEFAULT_VOLUME);
+            Log.i(TAG, "setting audio track volume to: " + initVolume);
+
+            UserCredentials userCredentials = null;
+            try {
+                userCredentials =
+                        EmbeddedAssistant.generateCredentials(this, R.raw.credentials);
+                progressDialog.setMessage("set Oauth credentials....");
+            } catch (IOException | JSONException e) {
+                Log.e(TAG, "error getting user credentials", e);
             }
-            if(mLed!=null) {
-                mLed.setDirection(Gpio.DIRECTION_OUT_INITIALLY_LOW);
-                mLed.setActiveType(Gpio.ACTIVE_HIGH);
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "error configuring peripherals:", e);
-            return;
-        }
+            try {
 
-        // Set volume from preferences
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        int initVolume = preferences.getInt(PREF_CURRENT_VOLUME, DEFAULT_VOLUME);
-        Log.i(TAG, "setting audio track volume to: " + initVolume);
-
-        UserCredentials userCredentials = null;
-        try {
-            userCredentials =
-                    EmbeddedAssistant.generateCredentials(this, R.raw.credentials);
-            progressDialog.setMessage("set Oauth credentials....");
-        } catch (IOException | JSONException e) {
-            Log.e(TAG, "error getting user credentials", e);
-        }
-        try {
-
-            progressDialog.setMessage("Embedded Assistant....");
-            mEmbeddedAssistant = new EmbeddedAssistant.Builder()
-                    .setCredentials(userCredentials)
-                    .setDeviceInstanceId(DEVICE_INSTANCE_ID)
-                    .setDeviceModelId(DEVICE_MODEL_ID)
-                    .setLanguageCode(LANGUAGE_CODE)
-                    .setAudioInputDevice(audioInputDevice)
-                    .setAudioOutputDevice(audioOutputDevice)
-                    .setAudioSampleRate(SAMPLE_RATE)
-                    .setAudioVolume(initVolume)
-                    .setRequestCallback(new RequestCallback() {
-                        @Override
-                        public void onRequestStart() {
-                            Log.i(TAG, "starting assistant request, enable microphones");
-                            mButtonWidget.setText(R.string.button_listening);
-                            mButtonWidget.setEnabled(false);
-                        }
-
-                        @Override
-                        public void onSpeechRecognition(List<SpeechRecognitionResult> results) {
-                            for (final SpeechRecognitionResult result : results) {
-                                Log.i(TAG, "assistant request text: " + result.getTranscript() +
-                                        " stability: " + Float.toString(result.getStability()));
-                                mAssistantRequestsAdapter.add(result.getTranscript());
+                progressDialog.setMessage("Embedded Assistant....");
+                mEmbeddedAssistant = new EmbeddedAssistant.Builder()
+                        .setCredentials(userCredentials)
+                        .setDeviceInstanceId(DEVICE_INSTANCE_ID)
+                        .setDeviceModelId(DEVICE_MODEL_ID)
+                        .setLanguageCode(LANGUAGE_CODE)
+                        .setAudioInputDevice(audioInputDevice)
+                        .setAudioOutputDevice(audioOutputDevice)
+                        .setAudioSampleRate(SAMPLE_RATE)
+                        .setAudioVolume(initVolume)
+                        .setRequestCallback(new RequestCallback() {
+                            @Override
+                            public void onRequestStart() {
+                                Log.i(TAG, "starting assistant request, enable microphones");
+                                mButtonWidget.setText(R.string.button_listening);
+                                mButtonWidget.setEnabled(false);
                             }
-                        }
 
-                        @Override
-                        public void onRequestFinish() {
-                            super.onRequestFinish();
-
-                        }
-                    })
-                    .setConversationCallback(new ConversationCallback() {
-                        @Override
-                        public void onResponseStarted() {
-                            super.onResponseStarted();
-                            // When bus type is switched, the AudioManager needs to reset the stream volume
-                            if (mDac != null) {
-                                try {
-                                    mDac.setSdMode(Max98357A.SD_MODE_LEFT);
-                                } catch (IOException e) {
-                                    Log.e(TAG, "error enabling DAC", e);
-                                }
-                            }
-                        }
-
-                        @Override
-                        public void onResponseFinished() {
-                            super.onResponseFinished();
-                            if (mDac != null) {
-                                try {
-                                    mDac.setSdMode(Max98357A.SD_MODE_SHUTDOWN);
-                                } catch (IOException e) {
-                                    Log.e(TAG, "error disabling DAC", e);
-                                }
-                            }
-                            if (mLed != null) {
-                                try {
-                                    mLed.setValue(false);
-                                    LEDShining = false;
-                                } catch (IOException e) {
-                                    Log.e(TAG, "cannot turn off LED", e);
+                            @Override
+                            public void onSpeechRecognition(List<SpeechRecognitionResult> results) {
+                                for (final SpeechRecognitionResult result : results) {
+                                    Log.i(TAG, "assistant request text: " + result.getTranscript() +
+                                            " stability: " + Float.toString(result.getStability()));
+                                    mAssistantRequestsAdapter.add(result.getTranscript());
                                 }
                             }
 
+                            @Override
+                            public void onRequestFinish() {
+                                super.onRequestFinish();
 
-                        }
+                            }
+                        })
+                        .setConversationCallback(new ConversationCallback() {
+                            @Override
+                            public void onResponseStarted() {
+                                super.onResponseStarted();
+                                // When bus type is switched, the AudioManager needs to reset the stream volume
+                                if (mDac != null) {
+                                    try {
+                                        mDac.setSdMode(Max98357A.SD_MODE_LEFT);
+                                    } catch (IOException e) {
+                                        Log.e(TAG, "error enabling DAC", e);
+                                    }
+                                }
+                            }
 
-                        @Override
-                        public void onError(Throwable throwable) {
-                            Log.e(TAG, "assist error: " + throwable.getMessage(), throwable);
-                        }
-
-                        @Override
-                        public void onVolumeChanged(int percentage) {
-                            Log.i(TAG, "assistant volume changed: " + percentage);
-                            // Update our shared preferences
-                            Editor editor = PreferenceManager
-                                    .getDefaultSharedPreferences(AssistantActivity.this)
-                                    .edit();
-                            editor.putInt(PREF_CURRENT_VOLUME, percentage);
-                            editor.apply();
-                        }
-
-                        @Override
-                        public void onConversationFinished() {
-                            Log.d(TAG, "sphinx assistant conversation finished");
-                            mButtonWidget.setText(R.string.button_new_request);
-                            mButtonWidget.setEnabled(true);
+                            @Override
+                            public void onResponseFinished() {
+                                super.onResponseFinished();
+                                if (mDac != null) {
+                                    try {
+                                        mDac.setSdMode(Max98357A.SD_MODE_SHUTDOWN);
+                                    } catch (IOException e) {
+                                        Log.e(TAG, "error disabling DAC", e);
+                                    }
+                                }
+                                if (mLed != null) {
+                                    try {
+                                        mLed.setValue(false);
+                                        LEDShining = false;
+                                    } catch (IOException e) {
+                                        Log.e(TAG, "cannot turn off LED", e);
+                                    }
+                                }
 
 
-                            //the user is done making their request. stop passing data and clean up
-                            Log.d(TAG, "sphinx the assistant request finish.");
-                            //okay we can activate via keyphrase again
-                            captechSphinxManager.startListeningToActivationPhrase();
+                            }
 
-                        }
+                            @Override
+                            public void onError(Throwable throwable) {
+                                Log.e(TAG, "assist error: " + throwable.getMessage(), throwable);
+                            }
 
-                        @Override
-                        public void onAssistantResponse(final String response) {
-                            if (!response.isEmpty()) {
+                            @Override
+                            public void onVolumeChanged(int percentage) {
+                                Log.i(TAG, "assistant volume changed: " + percentage);
+                                // Update our shared preferences
+                                Editor editor = PreferenceManager
+                                        .getDefaultSharedPreferences(AssistantActivity.this)
+                                        .edit();
+                                editor.putInt(PREF_CURRENT_VOLUME, percentage);
+                                editor.apply();
+                            }
+
+                            @Override
+                            public void onConversationFinished() {
+                                Log.d(TAG, "sphinx assistant conversation finished");
+                                mButtonWidget.setText(R.string.button_new_request);
+                                mButtonWidget.setEnabled(true);
+
+
+                                //the user is done making their request. stop passing data and clean up
+                                Log.d(TAG, "sphinx the assistant request finish.");
+                                //okay we can activate via keyphrase again
+                                captechSphinxManager.startListeningToActivationPhrase();
+
+                            }
+
+                            @Override
+                            public void onAssistantResponse(final String response) {
+                                if (!response.isEmpty()) {
+                                    mMainHandler.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            mAssistantRequestsAdapter.add("Google Assistant: " + response);
+                                        }
+                                    });
+                                }
+                            }
+
+                            @Override
+                            public void onAssistantDisplayOut(final String html) {
                                 mMainHandler.post(new Runnable() {
                                     @Override
                                     public void run() {
-                                        mAssistantRequestsAdapter.add("Google Assistant: " + response);
+                                        // Need to convert to base64
+                                        try {
+                                            final byte[] data = html.getBytes("UTF-8");
+                                            final String base64String =
+                                                    Base64.encodeToString(data, Base64.DEFAULT);
+                                            mWebView.loadData(base64String, "text/html; charset=utf-8",
+                                                    "base64");
+                                        } catch (UnsupportedEncodingException e) {
+                                            e.printStackTrace();
+                                        }
                                     }
                                 });
                             }
-                        }
 
-                        @Override
-                        public void onAssistantDisplayOut(final String html) {
-                            mMainHandler.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    // Need to convert to base64
-                                    try {
-                                        final byte[] data = html.getBytes("UTF-8");
-                                        final String base64String =
-                                                Base64.encodeToString(data, Base64.DEFAULT);
-                                        mWebView.loadData(base64String, "text/html; charset=utf-8",
-                                                "base64");
-                                    } catch (UnsupportedEncodingException e) {
-                                        e.printStackTrace();
-                                    }
-                                }
-                            });
-                        }
+                            public void onDeviceAction(String intentName, JSONObject parameters) {
 
-                        public void onDeviceAction(String intentName, JSONObject parameters) {
+                            }
+                        })
+                        .build();
+                mEmbeddedAssistant.connect();
+            } catch (Exception e) {
+                Log.e(TAG, "mEmbeddedAssistant Exception :" + e.getMessage() + "\n" + Utils.FormatStackTrace(e));
+                Toast.makeText(this, "Exception :" + e.getMessage(), Toast.LENGTH_LONG).show();
 
-                        }
-                    })
-                    .build();
-            mEmbeddedAssistant.connect();
-        }catch (Exception e){
-            Log.e(TAG,"Exception :"+e.getMessage());
-            Toast.makeText(this,"Exception :"+e.getMessage(),Toast.LENGTH_LONG).show();
+                    lyonTextToSpeech.speak((e.getMessage()));
+            }
+
+            //instantiate PSphinx
+            progressDialog.setMessage("Embedded Sphinx....");
+            captechSphinxManager = new CapTechSphinxManager(this, this);
+            LEDShining = true;
+
+            // TODO打開一盞燈！
+            LEDShining();
         }
-
-        //instantiate PSphinx
-        progressDialog.setMessage("Embedded Sphinx....");
-        captechSphinxManager = new CapTechSphinxManager(this, this);
-        LEDShining = true;
-
-        // TODO打開一盞燈！
-        LEDShining();
     }
 
     @Override
@@ -446,10 +463,14 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
             }
             mDac = null;
         }
-        mEmbeddedAssistant.destroy();
+        if(mEmbeddedAssistant!=null)
+            mEmbeddedAssistant.destroy();
 
         //let's clean up.
         captechSphinxManager.destroy();
+
+        if (lyonTextToSpeech != null)
+            lyonTextToSpeech.pause();
     }
 
     //===========Sphinx 喚醒詞=======================================================================
@@ -461,7 +482,8 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
         //lets show a blue light to indicate we are ready.
 //        playDing(this);
         LEDShining=false;
-        lyonTextToSpeech.textToSpeech("開機完畢 你可以使用 "+captechSphinxManager.getHotKeyWord()+" 來喚醒");
+        lyonTextToSpeech.speak("開機完畢 你可以使用 "+captechSphinxManager.getHotKeyWord()+" 來喚醒");
+        ToastUtile.showText(this,"開機完畢 你可以使用 "+captechSphinxManager.getHotKeyWord()+" 來喚醒");
         progressDialog.dismiss();
     }
 
@@ -469,6 +491,8 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
     public void onActivationPhraseDetected() {
         // TODO開始我們的助理請求
         Log.d(TAG, "Activation Phrase Detected");
+        lyonTextToSpeech.speak("是的");
+        ToastUtile.showText(this,"是的");
         mEmbeddedAssistant.startConversation();
         if (mLed != null) {
             try {
@@ -508,5 +532,8 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
             Log.e(TAG, "mLed == null");
         }
     }
+
+
+
 
 }

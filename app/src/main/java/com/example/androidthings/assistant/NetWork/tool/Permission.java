@@ -48,6 +48,19 @@ public class Permission {
         return checkStatus;
     }
 
+    public static boolean checAudioRecordPermission(Context context) {
+        boolean checkStatus = false;
+        String RECORD_AUDIO = Manifest.permission.RECORD_AUDIO;
+        String[] str_permissionModule = {RECORD_AUDIO};
+        int permission = ActivityCompat.checkSelfPermission(context, RECORD_AUDIO);
+        if (permission == PERMISSION_GRANTED){
+            checkStatus = true;
+        }else{
+            ActivityCompat.requestPermissions((Activity) context, str_permissionModule, ACCESS_FINE_LOCATION);
+        }
+        return checkStatus;
+    }
+
 
 
 }

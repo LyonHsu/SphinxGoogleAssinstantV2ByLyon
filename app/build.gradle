@@ -20,12 +20,15 @@ android {
     compileSdkVersion 27
 
     defaultConfig {
-        applicationId "com.example.androidthings.assistant"
+        applicationId "com.lyon.androidthings.assistant"
         minSdkVersion 27
         targetSdkVersion 27
         versionCode 1
-        versionName "1.0"
+        versionName "1.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+        // Enabling multidex support.
+        multiDexEnabled true
     }
     buildTypes {
         release {
@@ -39,14 +42,27 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+
+    packagingOptions {
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/NOTICE'
+    }
+
+    dexOptions {
+        preDexLibraries = false
+    }
+
 }
 
 dependencies {
     //android things def
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'com.android.support:appcompat-v7:27.1.1'
+    implementation ('com.android.support:appcompat-v7:27.0.0'){
+        exclude  group: 'com.google.android',module: 'support-v4'
+    }
     testImplementation 'junit:junit:4.12'
 
+    //Assinstant & google things
     implementation project(':grpc')
     compileOnly 'com.google.android.things:androidthings:1.0'
 
@@ -60,7 +76,15 @@ dependencies {
     //20190803 sphinx
     implementation 'edu.cmu.pocketsphinx:pocketsphinx-android:5prealpha-release@aar'
     implementation 'javax.annotation:javax.annotation-api:1.2'
+
     //NetWork
     implementation 'com.android.support:recyclerview-v7:24.2.1'
+
+    //DialgoFlow SDK dependencies
+    implementation ('ai.api:sdk:2.0.7'){
+        exclude  group: 'com.google.android',module: 'support-v4'
+    }
+//    implementation ('ai.api:libai:1.6.12')
+    implementation 'com.android.support:support-v4:27.0.0'
 
 }

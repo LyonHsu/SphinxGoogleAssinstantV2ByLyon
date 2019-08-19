@@ -7,7 +7,7 @@
 
     <ImageView
         android:layout_width="80dp"
-        app:srcCompat="@drawable/icon_y"
+        android:src="@drawable/icon_y"
         android:id="@+id/imageView2"
         android:layout_weight="0.22"
         android:layout_height="80dp"

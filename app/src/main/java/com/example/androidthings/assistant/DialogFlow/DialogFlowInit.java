@@ -32,10 +32,9 @@ public class DialogFlowInit {
                 AIConfiguration.SupportedLanguages.English,
                 AIConfiguration.RecognitionEngine.System);
         aiService = AIService.getService(context, config);
-        aiService.setListener(aiListener);
-        aiService.startListening();
+//        aiService.setListener(aiListener);
+//        aiService.startListening();
         aiDataService = new AIDataService(config);
-        setAiRequest("我要出去玩");
     }
 
     public void setAiRequest(String request){

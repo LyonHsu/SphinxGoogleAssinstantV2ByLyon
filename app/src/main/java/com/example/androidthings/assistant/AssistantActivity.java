@@ -40,6 +40,7 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.example.androidthings.assistant.DialogFlow.DialogFlowInit;
 import com.example.androidthings.assistant.EmbeddedAssistant.ConversationCallback;
 import com.example.androidthings.assistant.EmbeddedAssistant.RequestCallback;
 import com.example.androidthings.assistant.NetWork.NetWork;
@@ -115,6 +116,9 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
 
     ProgressDialog progressDialog;
     LyonTextToSpeech lyonTextToSpeech;
+
+    DialogFlowInit dialogFlowInit;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -382,12 +386,38 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
                         })
                         .build();
                 mEmbeddedAssistant.connect();
+                mEmbeddedAssistant.setOnPlayMusiceListener(new EmbeddedAssistant.OnPlayMusiceListener() {
+                    @Override
+                    public void playMusice(String request, float stability) {
+                        ToastUtile.showText(getParent(),request+" 播放音樂！！");
+                        if(dialogFlowInit!=null){
+                            dialogFlowInit.setAiRequest(request);
+                        }
+                    }
+                });
             } catch (Exception e) {
                 Log.e(TAG, "mEmbeddedAssistant Exception :" + e.getMessage() + "\n" + Utils.FormatStackTrace(e));
                 Toast.makeText(this, "Exception :" + e.getMessage(), Toast.LENGTH_LONG).show();
 
                     lyonTextToSpeech.speak((e.getMessage()));
             }
+
+            dialogFlowInit = new DialogFlowInit(this){
+                @Override
+                public void DialogFlowSpeech(String speech) {
+                    super.DialogFlowSpeech(speech);
+                    Log.e(TAG, "dialogFlowInit Conversation speech: " + speech );
+                }
+
+                @Override
+                public void DialogFlowAction(String action) {
+                    super.DialogFlowAction(action);
+                    Log.e(TAG, "dialogFlowInit Conversation action: " + action );
+                    if(action.equals("recommend")){
+
+                    }
+                }
+            };
 
             //instantiate PSphinx
             progressDialog.setMessage("Embedded Sphinx....");

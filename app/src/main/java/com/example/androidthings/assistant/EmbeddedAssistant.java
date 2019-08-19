@@ -28,6 +28,8 @@ import android.os.HandlerThread;
 import android.support.annotation.IntDef;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import android.view.View;
+
 import com.google.assistant.embedded.v1alpha2.AssistConfig;
 import com.google.assistant.embedded.v1alpha2.AssistRequest;
 import com.google.assistant.embedded.v1alpha2.AssistResponse;
@@ -59,7 +61,7 @@ import org.json.JSONObject;
 
 public class EmbeddedAssistant {
     private static final String TAG = EmbeddedAssistant.class.getSimpleName();
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
 
     private static final String ASSISTANT_API_ENDPOINT = "embeddedassistant.googleapis.com";
     private static final int AUDIO_RECORD_BLOCK_SIZE = 1024;
@@ -112,12 +114,19 @@ public class EmbeddedAssistant {
                             JSONObject deviceAction = new JSONObject(value.getDeviceAction()
                                 .getDeviceRequestJson());
                             JSONArray inputs = deviceAction.getJSONArray("inputs");
+                            if (DEBUG) {
+                                Log.d(TAG, "Received response inputs: " + inputs.toString());
+                            }
                             for (int i = 0; i < inputs.length(); i++) {
                                 if (inputs.getJSONObject(i).getString("intent").equals(
                                     "action.devices.EXECUTE")) {
                                     JSONArray commands = inputs.getJSONObject(i)
                                         .getJSONObject("payload")
                                         .getJSONArray("commands");
+
+                                    if (DEBUG) {
+                                        Log.d(TAG, "Received response commands: " + commands.toString());
+                                    }
                                     for (int j = 0; j < commands.length(); j++) {
                                         final JSONArray execution = commands.getJSONObject(j)
                                             .getJSONArray("execution");
@@ -163,12 +172,32 @@ public class EmbeddedAssistant {
                     }
                     if (value.getDialogStateOut() != null) {
                         mConversationState = value.getDialogStateOut().getConversationState();
+                        if (DEBUG) {
+//                            Log.d(TAG, "Received response Conversation mConversationState: " + mConversationState.toString());
+                            List<SpeechRecognitionResult> results = value.getSpeechResultsList();
+                            for (final SpeechRecognitionResult result : results) {
+                                String conversationText = result.getTranscript();
+                                float conversationStability =  result.getStability();
+                                if(conversationStability>0.8){
+                                    Log.i(TAG, "Received response Conversation request text: " + conversationText +
+                                            " stability: " + conversationStability);
+                                    if(conversationText.contains("音樂") ||conversationText.contains("周杰倫")){
+                                        if(onPlayMusiceListener!=null)
+                                            onPlayMusiceListener.playMusice(conversationText,conversationStability);
+                                        Log.e(TAG, "Received response Conversation return: " + conversationText +
+                                                " stability: " + conversationStability);
+                                        return;
+                                    }
+                                }
+                            }
+                        }
                         if (value.getDialogStateOut().getVolumePercentage() != 0) {
                             final int volumePercentage = value.getDialogStateOut().getVolumePercentage();
                             mVolume = volumePercentage;
                             mConversationHandler.post(new Runnable() {
                                 @Override
                                 public void run() {
+                                    Log.d(TAG,"Received response VolumeChanged :"+volumePercentage);
                                     mConversationCallback.onVolumeChanged(volumePercentage);
                                 }
                             });
@@ -804,4 +833,16 @@ public class EmbeddedAssistant {
          */
         public void onConversationFinished() {}
     }
+
+    private OnPlayMusiceListener onPlayMusiceListener = null;
+    //define interface
+    public static interface OnPlayMusiceListener {
+        void playMusice(String request,float stability);
+    }
+
+    public void setOnPlayMusiceListener(OnPlayMusiceListener listener) {
+        this.onPlayMusiceListener = listener;
+    }
+
+
 }

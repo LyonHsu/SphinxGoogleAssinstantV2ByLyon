@@ -175,42 +175,48 @@ public class EmbeddedAssistant {
                         if (DEBUG) {
 //                            Log.d(TAG, "Received response Conversation mConversationState: " + mConversationState.toString());
                             List<SpeechRecognitionResult> results = value.getSpeechResultsList();
+                            boolean isSpecialRequest = false;
                             for (final SpeechRecognitionResult result : results) {
                                 String conversationText = result.getTranscript();
                                 float conversationStability =  result.getStability();
                                 if(conversationStability>0.8){
                                     Log.i(TAG, "Received response Conversation request text: " + conversationText +
                                             " stability: " + conversationStability);
+
                                     if(conversationText.contains("音樂") ||conversationText.contains("周杰倫")){
                                         if(onPlayMusiceListener!=null)
                                             onPlayMusiceListener.playMusice(conversationText,conversationStability);
                                         Log.e(TAG, "Received response Conversation return: " + conversationText +
                                                 " stability: " + conversationStability);
-                                        return;
+                                        isSpecialRequest = true;
+                                        stopConversation();
                                     }
                                 }
                             }
-                        }
-                        if (value.getDialogStateOut().getVolumePercentage() != 0) {
-                            final int volumePercentage = value.getDialogStateOut().getVolumePercentage();
-                            mVolume = volumePercentage;
-                            mConversationHandler.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Log.d(TAG,"Received response VolumeChanged :"+volumePercentage);
-                                    mConversationCallback.onVolumeChanged(volumePercentage);
+                            if(!isSpecialRequest){
+                                if (value.getDialogStateOut().getVolumePercentage() != 0) {
+                                    final int volumePercentage = value.getDialogStateOut().getVolumePercentage();
+                                    mVolume = volumePercentage;
+                                    mConversationHandler.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            Log.d(TAG,"Received response VolumeChanged :"+volumePercentage);
+                                            mConversationCallback.onVolumeChanged(volumePercentage);
+                                        }
+                                    });
                                 }
-                            });
-                        }
-                        mRequestHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                mRequestCallback.onSpeechRecognition(value.getSpeechResultsList());
+                                mRequestHandler.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        mRequestCallback.onSpeechRecognition(value.getSpeechResultsList());
+                                    }
+                                });
+                                mMicrophoneMode = value.getDialogStateOut().getMicrophoneMode();
+                                mConversationCallback.onAssistantResponse(value.getDialogStateOut()
+                                        .getSupplementalDisplayText());
                             }
-                        });
-                        mMicrophoneMode = value.getDialogStateOut().getMicrophoneMode();
-                        mConversationCallback.onAssistantResponse(value.getDialogStateOut()
-                            .getSupplementalDisplayText());
+                        }
+
                     }
                     if (value.getAudioOut() != null) {
                         if (mAudioOutSize <= value.getAudioOut().getSerializedSize()) {

@@ -9,6 +9,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
+import com.example.androidthings.assistant.AssistantActivity;
 import com.example.androidthings.assistant.BoardDefaults;
 
 import java.io.File;
@@ -51,10 +52,20 @@ public class LyonSpeechRecognizer extends SpeechRecognizer {
         AudioDeviceInfo audioInputDevice = null;
         AudioDeviceInfo audioOutputDevice = null;
         if (USE_VOICEHAT_I2S_DAC) {
-            audioInputDevice = findAudioDevice(AudioManager.GET_DEVICES_INPUTS, AudioDeviceInfo.TYPE_BUS);
-            this.recorder.setPreferredDevice(audioInputDevice);
-            if (audioInputDevice == null) {
-                Log.e(TAG, "failed to find I2S audio input device, using default");
+            if(AssistantActivity.isGoogleAIY) {
+                audioInputDevice = findAudioDevice(AudioManager.GET_DEVICES_INPUTS, AudioDeviceInfo.TYPE_BUS);
+                this.recorder.setPreferredDevice(audioInputDevice);
+                if (audioInputDevice == null) {
+                    Log.e(TAG, "failed to find I2S audio input device, using default");
+                }
+            }else{
+                audioInputDevice = findAudioDevice(AudioManager.GET_DEVICES_INPUTS, AudioDeviceInfo.TYPE_USB_DEVICE);
+                this.recorder.setPreferredDevice(audioInputDevice);
+                if (audioInputDevice == null) {
+                    Log.e(TAG, "failed to find I2S audio input device, using Unknow");
+                } else {
+                    Log.d(TAG, " find USB audio input device, using USB");
+                }
             }
         }
 

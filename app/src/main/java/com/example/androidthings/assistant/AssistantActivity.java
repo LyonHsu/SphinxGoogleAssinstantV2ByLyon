@@ -111,7 +111,7 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
     NetWork netWork;
 
     //Is Use Google AIY Device
-    boolean isGoogleAIY = false;
+    public static boolean isGoogleAIY = false;
 
     Context context;
     ProgressDialog progressDialog;
@@ -152,14 +152,23 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
             });
 
 
+            //設定音量
+            final int systemName = AudioManager.STREAM_SYSTEM;
+            AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
+            int maVolume = audioManager.getStreamMaxVolume(systemName);
+            audioManager.setStreamVolume(systemName,maVolume,AudioManager.FLAG_SHOW_UI );
 
             setTurnScreenOn(true);
 
 
-            progressDialog = new ProgressDialog(this);
-            progressDialog.setTitle("init");
-            progressDialog.setMessage("beging....");
-            progressDialog.show();
+            try {
+                progressDialog = new ProgressDialog(this);
+                progressDialog.setTitle("init");
+                progressDialog.setMessage("beging....");
+                progressDialog.show();
+            }catch (Exception e){
+                Log.e(TAG,Utils.FormatStackTrace(e));
+            }
             final ListView assistantRequestsListView = findViewById(R.id.assistantRequestsListView);
             mAssistantRequestsAdapter =
                     new ArrayAdapter<>(this, android.R.layout.simple_list_item_1,
@@ -436,7 +445,7 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
                 Log.e(TAG, "mEmbeddedAssistant Exception :" + e.getMessage() + "\n" + Utils.FormatStackTrace(e));
                 Toast.makeText(this, "Exception :" + e.getMessage(), Toast.LENGTH_LONG).show();
 
-                    LyonTextToSpeech.speak(context,textToSpeech,e.getMessage());
+//                    LyonTextToSpeech.speak(context,textToSpeech,e.getMessage());
             }
 
             dialogFlowInit = new DialogFlowInit(this){

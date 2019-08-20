@@ -407,6 +407,7 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
                 public void DialogFlowSpeech(String speech) {
                     super.DialogFlowSpeech(speech);
                     Log.e(TAG, "dialogFlowInit Conversation speech: " + speech );
+                    mAssistantRequestsAdapter.add("DialogFlowInit AIResponse:"+speech);
                 }
 
                 @Override

@@ -102,7 +102,7 @@ public class NetWork extends RelativeLayout {
         Log.e(TAG, "20190610 ***** IP="+ ip);
         String theSpeech="已經連結到"+wifiInf.getSSID()+",Ip="+ip.replace(".","點");
         Log.e(TAG, "20190610***** theSpeechIP="+ theSpeech);
-        return "Wifi:"+ip+"\n ("+wifiInf.getSSID().toString()+") connected\n"+wifiInf.getBSSID();
+        return theSpeech;
     }
 
     private static String getAppVersionName(Context context) {

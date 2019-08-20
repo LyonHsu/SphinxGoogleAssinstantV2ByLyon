@@ -5,22 +5,18 @@ import android.os.Build;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
 
+import com.example.androidthings.assistant.Tool.ToastUtile;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
 
-public class LyonTextToSpeech  {
-    String TAG = LyonTextToSpeech.class.getSimpleName();
-    private static TextToSpeech textToSpeech;
-    Context context;
+public class LyonTextToSpeech {
+    static String TAG = LyonTextToSpeech.class.getSimpleName();
 
-    public LyonTextToSpeech(Context context){
-        this.context=context;
-        textToSpeech=getTextToSpeech();
-    }
 
-    public void speak(String sss){
-         textToSpeech =  getTextToSpeech();
+    public static void speak(Context context, TextToSpeech textToSpeech, String sss){
+        ToastUtile.showText(context,sss);
         String TAGG = "LyonTextToSpeech "+TAG;
         if(textToSpeech==null)
         {
@@ -28,7 +24,7 @@ public class LyonTextToSpeech  {
             return;
         }
         Log.e(TAGG,"textToSpeech "+sss);
-        ArrayList<HashMap<String,String>> arrayList = getEngorChingString(sss);
+        ArrayList<HashMap<String, String>> arrayList = getEngorChingString(sss);
         for(int i =0;i<arrayList.size();i++){
             int result=-1;
             if(arrayList.get(i).get("isEng").equals("true")){
@@ -39,18 +35,23 @@ public class LyonTextToSpeech  {
                 result=1;
             }
             int isSpeak=-2;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                if (i == 0) {
-                    isSpeak = textToSpeech.speak(arrayList.get(i).get("word"), TextToSpeech.QUEUE_FLUSH, null, null);
-                } else
-                    isSpeak = textToSpeech.speak(arrayList.get(i).get("word"), TextToSpeech.QUEUE_ADD, null, null);
-            }else{
-                if (i == 0) {
-                    isSpeak = textToSpeech.speak(arrayList.get(i).get("word"), TextToSpeech.QUEUE_FLUSH, null);
-                } else
-                    isSpeak = textToSpeech.speak(arrayList.get(i).get("word"), TextToSpeech.QUEUE_ADD, null);
+            /**
+             * TextToSpeech.QUEUE_FLUSH 丢弃之前的播报任务，立即播报本次内容
+             * TextToSpeech.QUEUE_ADD 播放完之前的语音任务后才播报本次内容
+             * params 设置TTS参数，可以是null。 final HashMap<String, String> params
+             * KEY_PARAM_STREAM：音频通道，可以是：STREAM_MUSIC、STREAM_NOTIFICATION、STREAM_RING等
+             * KEY_PARAM_VOLUME：音量大小，0-1f
+             * 返回值：int SUCCESS = 0，int ERROR = -1。
+             */
+            final HashMap<String, String> params = new HashMap<>();
+            params.put("KEY_PARAM_STREAM","STREAM_NOTIFICATION");
+            params.put("KEY_PARAM_VOLUME","0.8f");
 
-            }
+            if (i == 0) {
+                isSpeak = textToSpeech.speak(arrayList.get(i).get("word"), TextToSpeech.QUEUE_FLUSH, params);
+            } else
+                isSpeak = textToSpeech.speak(arrayList.get(i).get("word"), TextToSpeech.QUEUE_ADD, params);
+
             if(isSpeak == TextToSpeech.ERROR){
                 Log.e(TAGG,"\""+arrayList.get(i).get("word")+"\" speak isSpeak:ERROR");
             }else
@@ -58,30 +59,10 @@ public class LyonTextToSpeech  {
         }
     }
 
-    public TextToSpeech getTextToSpeech(){
-        //set text to speech
-        if(textToSpeech==null) {
-            textToSpeech= new TextToSpeech(context, new TextToSpeech.OnInitListener() {
-                @Override
-                public void onInit(int status) {
-                    Log.d(TAG, "getTextToSpeech TTS init status:" + status);
-                    if (status != TextToSpeech.ERROR) {
-//                        int result = textToSpeech.setLanguage(Locale.getDefault());//Locale.);
-                        int result = textToSpeech.setLanguage(Locale.TAIWAN);
-
-                        Log.d(TAG, "getTextToSpeech speak result init:" + result);
-                        init(status);
-                    }
-                }
-            });
-        }
-        return textToSpeech;
-    }
-
-    public ArrayList<HashMap<String,String>> getEngorChingString(String s){
+    private static ArrayList<HashMap<String, String>> getEngorChingString(String s){
         Log.d(TAG,"20190605 string:"+s);
-        HashMap<String,String> hashMap = new HashMap<>();
-        ArrayList<HashMap<String,String>> arrayList = new ArrayList<>();
+        HashMap<String, String> hashMap = new HashMap<>();
+        ArrayList<HashMap<String, String>> arrayList = new ArrayList<>();
         char[] c = s.toCharArray();
         Log.d(TAG,"20190605 c size:"+c.length);
         String word="";
@@ -124,10 +105,5 @@ public class LyonTextToSpeech  {
 
     public void init(int status){
 
-    }
-
-    public static void pause() {
-        textToSpeech.stop();
-        textToSpeech.shutdown();
     }
 }

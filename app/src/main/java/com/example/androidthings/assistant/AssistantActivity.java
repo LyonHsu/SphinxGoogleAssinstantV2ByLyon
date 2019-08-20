@@ -44,7 +44,6 @@ import com.example.androidthings.assistant.DialogFlow.DialogFlowInit;
 import com.example.androidthings.assistant.EmbeddedAssistant.ConversationCallback;
 import com.example.androidthings.assistant.EmbeddedAssistant.RequestCallback;
 import com.example.androidthings.assistant.NetWork.NetWork;
-import com.example.androidthings.assistant.NetWork.WifiSetting.WifiMenu;
 import com.example.androidthings.assistant.NetWork.tool.Alert;
 import com.example.androidthings.assistant.NetWork.tool.Permission;
 import com.example.androidthings.assistant.Sphinx.CapTechSphinxManager;
@@ -59,7 +58,6 @@ import com.google.auth.oauth2.UserCredentials;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
@@ -67,6 +65,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.example.androidthings.assistant.Tool.Utils;
+
+import static com.example.androidthings.assistant.Sphinx.CapTechSphinxManager.ACTIVATION_KEYPHRASE;
 
 
 public class AssistantActivity extends Activity implements Button.OnButtonEventListener, CapTechSphinxManager.SphinxListener {
@@ -113,30 +113,47 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
     //Is Use Google AIY Device
     boolean isGoogleAIY = false;
 
-
+    Context context;
     ProgressDialog progressDialog;
-    LyonTextToSpeech lyonTextToSpeech;
-
+    TextToSpeech textToSpeech;
     DialogFlowInit dialogFlowInit;
+    String AISay="Yes";
+    String openComplete = "開機完畢 你可以使用 " + ACTIVATION_KEYPHRASE + " 來喚醒";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.i(TAG, "starting assistant demo");
-
+        context = this;
         Permission permission = new Permission();
-        if(!permission.checAudioRecordPermission(this)){
+        if(!permission.checAudioRecordPermission(context)){
             Alert.showAlert(this, getString(R.string.wifititle), getString(R.string.wifioffmassage), "ok");
         }else {
             setContentView(R.layout.activity_main);
-            lyonTextToSpeech = new LyonTextToSpeech(this){
+
+            textToSpeech= new TextToSpeech(context, new TextToSpeech.OnInitListener() {
                 @Override
-                public void init(int status) {
-                    super.init(status);
-                    Log.d(TAG,"lyonTextToSpeech init status:"+status);
-                    speak("正在開機");
+                public void onInit(int status) {
+                    Log.d(TAG, "getTextToSpeech TTS init status:" + status);
+                    if (status != TextToSpeech.ERROR) {
+//                        int result = textToSpeech.setLanguage(Locale.getDefault());//Locale.);
+                        textToSpeech.setPitch(1.0f); // 音調
+                        textToSpeech.setSpeechRate(1.0f); // 速度
+                        int result = textToSpeech.setLanguage(Locale.US);
+                        textToSpeech.speak(openComplete, TextToSpeech.QUEUE_FLUSH, null);
+                        Log.d(TAG, "getTextToSpeech speak result init:" + result);
+
+
+                    }else{
+                        Log.e(TAG, "getTextToSpeech TTS init Error:" + status);
+                        ToastUtile.showText(context,"getTextToSpeech TTS init Error:" + status);
+                    }
                 }
-            };
+            });
+
+
+
+            setTurnScreenOn(true);
 
 
             progressDialog = new ProgressDialog(this);
@@ -164,6 +181,13 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
             mWebView.getSettings().setJavaScriptEnabled(true);
 
             netWork = (NetWork) findViewById(R.id.network);
+            netWork.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    LyonTextToSpeech.speak(context,textToSpeech,netWork.getLocalIpAddress(context));
+
+                }
+            });
 
             mMainHandler = new Handler(getMainLooper());
             mButtonWidget = findViewById(R.id.assistantQueryButton);
@@ -179,6 +203,13 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
 
 
             // Audio routing configuration: use default routing.
+            /**
+             * AudioDeviceInfo.TYPE_BUILTIN_SPEAKER;//for 3.5mm
+             * AudioDeviceInfo.TYPE_BUILTIN_MIC;//for 3.5mm
+             * AudioDeviceInfo.TYPE_USB_DEVICE;//for USB
+             * AudioDeviceInfo.TYPE_BUS;//for I2S like AIY
+             * can't see the ReadMe Audio Configuration
+             */
             AudioDeviceInfo audioInputDevice = null;
             AudioDeviceInfo audioOutputDevice = null;
             if (USE_VOICEHAT_I2S_DAC) {
@@ -191,7 +222,7 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
                     }
                     audioOutputDevice = findAudioDevice(AudioManager.GET_DEVICES_OUTPUTS, AudioDeviceInfo.TYPE_BUS);
                     if (audioOutputDevice == null) {
-                        Log.e(TAG, "failed to found I2S audio output device, using default");
+                        Log.e(TAG, "failed to found I2S audio output device, using Unknow");
                     } else {
                         Log.d(TAG, " find USB audio input device, using I2S");
                     }
@@ -199,9 +230,15 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
                     Log.e(TAG, " find USB audio input device, using default");
                     audioInputDevice = findAudioDevice(AudioManager.GET_DEVICES_INPUTS, AudioDeviceInfo.TYPE_USB_DEVICE);
                     if (audioInputDevice == null) {
-                        Log.e(TAG, "failed to find I2S audio input device, using default");
+                        Log.e(TAG, "failed to find I2S audio input device, using Unknow");
                     } else {
                         Log.d(TAG, " find USB audio input device, using USB");
+                    }
+                    audioOutputDevice = findAudioDevice(AudioManager.GET_DEVICES_OUTPUTS, AudioDeviceInfo.TYPE_BUILTIN_SPEAKER);
+                    if (audioOutputDevice == null) {
+                        Log.e(TAG, "failed to found 3.5mm audio output device, using Unknow");
+                    } else {
+                        Log.d(TAG, " find 3.5mm audio input device, using 3.5mm");
                     }
                 }
 
@@ -389,7 +426,7 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
                 mEmbeddedAssistant.setOnPlayMusiceListener(new EmbeddedAssistant.OnPlayMusiceListener() {
                     @Override
                     public void playMusice(String request, float stability) {
-                        ToastUtile.showText(getParent(),request+" 播放音樂！！");
+                        ToastUtile.showText(AssistantActivity.this,request+" 播放音樂！！");
                         if(dialogFlowInit!=null){
                             dialogFlowInit.setAiRequest(request);
                         }
@@ -399,7 +436,7 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
                 Log.e(TAG, "mEmbeddedAssistant Exception :" + e.getMessage() + "\n" + Utils.FormatStackTrace(e));
                 Toast.makeText(this, "Exception :" + e.getMessage(), Toast.LENGTH_LONG).show();
 
-                    lyonTextToSpeech.speak((e.getMessage()));
+                    LyonTextToSpeech.speak(context,textToSpeech,e.getMessage());
             }
 
             dialogFlowInit = new DialogFlowInit(this){
@@ -459,6 +496,7 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
             Log.d(TAG, "error toggling LED:", e);
         }
         if (pressed) {
+            LyonTextToSpeech.speak(context,textToSpeech,AISay);
             captechSphinxManager.SpeechRecognizerStop();
             mEmbeddedAssistant.startConversation();
         }
@@ -498,10 +536,14 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
             mEmbeddedAssistant.destroy();
 
         //let's clean up.
-        captechSphinxManager.destroy();
+        if(captechSphinxManager!=null)
+            captechSphinxManager.destroy();
 
-        if (lyonTextToSpeech != null)
-            lyonTextToSpeech.pause();
+        if (textToSpeech != null) {
+            textToSpeech.stop();
+            textToSpeech.shutdown();
+            textToSpeech=null;
+        }
     }
 
     //===========Sphinx 喚醒詞=======================================================================
@@ -513,8 +555,10 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
         //lets show a blue light to indicate we are ready.
 //        playDing(this);
         LEDShining=false;
-        lyonTextToSpeech.speak("開機完畢 你可以使用 "+captechSphinxManager.getHotKeyWord()+" 來喚醒");
-        ToastUtile.showText(this,"開機完畢 你可以使用 "+captechSphinxManager.getHotKeyWord()+" 來喚醒");
+        if(textToSpeech!=null) {
+            LyonTextToSpeech.speak(context, textToSpeech, openComplete);
+            ToastUtile.showText(this, openComplete);
+        }
         progressDialog.dismiss();
     }
 
@@ -522,8 +566,11 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
     public void onActivationPhraseDetected() {
         // TODO開始我們的助理請求
         Log.d(TAG, "Activation Phrase Detected");
-        lyonTextToSpeech.speak("是的");
+        LyonTextToSpeech.speak(context,textToSpeech,AISay);
+
         ToastUtile.showText(this,"是的");
+
+
         mEmbeddedAssistant.startConversation();
         if (mLed != null) {
             try {
@@ -532,6 +579,8 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
                 e.printStackTrace();
             }
         }
+
+
     }
 
     private void LEDShining(){

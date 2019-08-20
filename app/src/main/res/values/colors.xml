@@ -2,4 +2,6 @@
 <resources>
     <color name="higlight_blue">#1b62b4</color>
     <color name="Transparent">#00ffffff</color>
+
+    <color name="blue_Transparent">#402196F3</color>
 </resources>

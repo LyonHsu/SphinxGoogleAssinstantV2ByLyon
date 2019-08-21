@@ -64,5 +64,7 @@
         <activity
             android:name=".NetWork.WifiSetting.WifiMenu"
             android:screenOrientation="landscape" />
+
+        <activity android:name=".Youtube.YoutubePlayer"/>
     </application>
 </manifest>

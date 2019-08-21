@@ -19,6 +19,7 @@ package com.example.androidthings.assistant;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.media.AudioDeviceInfo;
@@ -49,6 +50,8 @@ import com.example.androidthings.assistant.NetWork.tool.Permission;
 import com.example.androidthings.assistant.Sphinx.CapTechSphinxManager;
 import com.example.androidthings.assistant.TextToSpeech.LyonTextToSpeech;
 import com.example.androidthings.assistant.Tool.ToastUtile;
+import com.example.androidthings.assistant.Youtube.YoutubePlayer;
+import com.example.androidthings.assistant.Youtube.YoutubePoster;
 import com.google.android.things.contrib.driver.button.Button;
 import com.google.android.things.contrib.driver.voicehat.Max98357A;
 import com.google.android.things.contrib.driver.voicehat.VoiceHat;
@@ -153,10 +156,18 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
 
 
             //設定音量
-            final int systemName = AudioManager.STREAM_SYSTEM;
+            int systemName = AudioManager.STREAM_SYSTEM;
             AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
             int maVolume = audioManager.getStreamMaxVolume(systemName);
             audioManager.setStreamVolume(systemName,maVolume,AudioManager.FLAG_SHOW_UI );
+            systemName = AudioManager.STREAM_MUSIC;//STREAM_RING
+            maVolume = audioManager.getStreamMaxVolume(systemName);
+            audioManager.setStreamVolume(systemName,maVolume,AudioManager.FLAG_VIBRATE );
+            systemName = AudioManager.STREAM_RING;//STREAM_RING
+            maVolume = audioManager.getStreamMaxVolume(systemName);
+            audioManager.setStreamVolume(systemName,maVolume,AudioManager.FLAG_VIBRATE );
+            ToastUtile.showText(context,"設定音量為："+maVolume);
+            Log.e(TAG,"設定音量為："+maVolume);
 
             setTurnScreenOn(true);
 
@@ -454,6 +465,20 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
                     super.DialogFlowSpeech(speech);
                     Log.e(TAG, "dialogFlowInit Conversation speech: " + speech );
                     mAssistantRequestsAdapter.add("DialogFlowInit AIResponse:"+speech);
+
+                    if(speech.contains("play") || true){
+
+                        Intent intent = new Intent(AssistantActivity.this, YoutubePlayer.class);
+                        Bundle bundle = new Bundle();
+                        String videoId="OsUr8N7t4zc";
+//                        for(int i=0;i<youtubePosters.size();i++){
+//                            videoId=videoId+","+youtubePosters.get(i).getYoutubeId();
+//                        }
+                        bundle.putString("videoId",videoId);
+                        Log.d(TAG,"videoId:"+videoId);
+                        intent.putExtras(bundle);
+                        startActivity(intent);
+                    }
                 }
 
                 @Override

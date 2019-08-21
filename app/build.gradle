@@ -24,7 +24,7 @@ android {
         minSdkVersion 27
         targetSdkVersion 27
         versionCode 1
-        versionName "1.1"
+        versionName "1.2"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
         // Enabling multidex support.
@@ -86,5 +86,10 @@ dependencies {
     }
 //    implementation ('ai.api:libai:1.6.12')
     implementation 'com.android.support:support-v4:27.0.0'
+
+    //youtube sdk search
+    implementation('com.google.apis:google-api-services-youtube:v3-rev206-1.25.0') {
+        exclude group: 'org.apache.httpcomponents'
+    }
 
 }

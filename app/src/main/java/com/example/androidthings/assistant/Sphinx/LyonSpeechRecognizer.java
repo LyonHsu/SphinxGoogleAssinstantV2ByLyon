@@ -56,15 +56,15 @@ public class LyonSpeechRecognizer extends SpeechRecognizer {
                 audioInputDevice = findAudioDevice(AudioManager.GET_DEVICES_INPUTS, AudioDeviceInfo.TYPE_BUS);
                 this.recorder.setPreferredDevice(audioInputDevice);
                 if (audioInputDevice == null) {
-                    Log.e(TAG, "failed to find I2S audio input device, using default");
+                    Log.e("Lyon"+TAG, "failed to find I2S audio input device, using default");
                 }
             }else{
                 audioInputDevice = findAudioDevice(AudioManager.GET_DEVICES_INPUTS, AudioDeviceInfo.TYPE_USB_DEVICE);
                 this.recorder.setPreferredDevice(audioInputDevice);
                 if (audioInputDevice == null) {
-                    Log.e(TAG, "failed to find I2S audio input device, using Unknow");
+                    Log.e("Lyon"+TAG, "failed to find I2S audio input device, using Unknow");
                 } else {
-                    Log.d(TAG, " find USB audio input device, using USB");
+                    Log.d("Lyon"+TAG, " find USB audio input device, using USB");
                 }
             }
         }

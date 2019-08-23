@@ -67,17 +67,19 @@ public class NetWork extends RelativeLayout {
         networkTxt.setText("Network:"+"    ver:"+getAppVersionName(context)+" "+getAppVersion(context));
         addView(view);
         getLocalIpAddress(context);
-        setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-//                Toast.makeText(context,"NetWork onClick!",Toast.LENGTH_LONG).show();
-                Log.e(TAG,"NetWork onClick!");
-                Intent intent = new Intent(context, WifiMenu.class);
-                context.startActivity(intent);
-//               1
-                Log.e(TAG,"ACTION_SETTINGS");
-            }
-        });
+//        setOnClickListener(new OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                superOnClick();
+//            }
+//        });
+    }
+
+    public void superOnClick(){
+        Log.e(TAG,"NetWork onClick!");
+        Intent intent = new Intent(context, WifiMenu.class);
+        context.startActivity(intent);
+        Log.e(TAG,"ACTION_SETTINGS");
     }
 
     public String getLocalIpAddress(Context context) {

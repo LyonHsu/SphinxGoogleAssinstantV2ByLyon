@@ -204,6 +204,7 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
             netWork.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    netWork.superOnClick();
                     LyonTextToSpeech.speak(context,textToSpeech,netWork.getLocalIpAddress(context));
 
                 }
@@ -465,7 +466,7 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
                     super.DialogFlowSpeech(speech);
                     Log.e(TAG, "dialogFlowInit Conversation speech: " + speech );
                     mAssistantRequestsAdapter.add("DialogFlowInit AIResponse:"+speech);
-
+                    LyonTextToSpeech.speak(context,textToSpeech,speech);
                     if(speech.contains("play") || true){
 
                         Intent intent = new Intent(AssistantActivity.this, YoutubePlayer.class);

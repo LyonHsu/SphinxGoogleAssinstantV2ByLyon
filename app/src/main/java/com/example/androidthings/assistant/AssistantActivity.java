@@ -29,6 +29,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.speech.tts.TextToSpeech;
+import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
@@ -466,7 +467,8 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
                     super.DialogFlowSpeech(speech);
                     Log.e(TAG, "dialogFlowInit Conversation speech: " + speech );
                     mAssistantRequestsAdapter.add("DialogFlowInit AIResponse:"+speech);
-                    LyonTextToSpeech.speak(context,textToSpeech,speech);
+                    if(!TextUtils.isEmpty(speech))
+                        LyonTextToSpeech.speak(context,textToSpeech,speech);
                     if(speech.contains("play") || true){
 
                         Intent intent = new Intent(AssistantActivity.this, YoutubePlayer.class);

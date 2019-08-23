@@ -10,6 +10,10 @@ import android.widget.RelativeLayout;
 import com.example.androidthings.assistant.R;
 import com.example.androidthings.assistant.Youtube.Play.YoutubeFragment;
 
+/**
+ * adb shell pm uninstall -k  com.google.android.youtube
+ * adb shell pm uninstall -k com.google.android.youtube
+ */
 
 public class YoutubePlayer extends FragmentActivity {
     public String VIDEO_ID = "OsUr8N7t4zc";

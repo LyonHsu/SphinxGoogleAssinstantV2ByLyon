@@ -172,7 +172,7 @@ public class EmbeddedAssistant {
                     }
                     if (value.getDialogStateOut() != null) {
                         mConversationState = value.getDialogStateOut().getConversationState();
-                        if (DEBUG) {
+                        if (DEBUG ||true ) {
 //                            Log.d(TAG, "Received response Conversation mConversationState: " + mConversationState.toString());
                             List<SpeechRecognitionResult> results = value.getSpeechResultsList();
                             boolean isSpecialRequest = false;
@@ -183,14 +183,14 @@ public class EmbeddedAssistant {
                                     Log.i(TAG, "Received response Conversation request text: " + conversationText +
                                             " stability: " + conversationStability);
 
-                                    if(conversationText.contains("音樂") ||conversationText.contains("周杰倫")){
+//                                    if(conversationText.contains("音樂") ||conversationText.contains("周杰倫")){
                                         if(onPlayMusiceListener!=null)
                                             onPlayMusiceListener.playMusice(conversationText,conversationStability);
                                         Log.e(TAG, "Received response Conversation return: " + conversationText +
                                                 " stability: " + conversationStability);
                                         isSpecialRequest = true;
                                         stopConversation();
-                                    }
+//                                    }
                                 }
                             }
                             if(!isSpecialRequest){

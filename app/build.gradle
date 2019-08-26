@@ -88,8 +88,13 @@ dependencies {
     implementation 'com.android.support:support-v4:27.0.0'
 
     //youtube sdk search
+    implementation 'pub.devrel:easypermissions:0.3.0'
+    implementation('com.google.api-client:google-api-client-android:1.25.0') {
+        exclude group: 'org.apache.httpcomponents'
+    }
     implementation('com.google.apis:google-api-services-youtube:v3-rev206-1.25.0') {
         exclude group: 'org.apache.httpcomponents'
     }
+
 
 }

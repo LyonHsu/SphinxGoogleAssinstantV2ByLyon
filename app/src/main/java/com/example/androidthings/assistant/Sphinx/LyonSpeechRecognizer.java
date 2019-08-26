@@ -42,7 +42,7 @@ public class LyonSpeechRecognizer extends SpeechRecognizer {
         this.context=context;
         this.decoder = new Decoder(config);
         this.sampleRate = (int)this.decoder.getConfig().getFloat("-samprate");
-        this.bufferSize = Math.round((float)this.sampleRate * 0.4F);
+        this.bufferSize = (int)Math.round((float)this.sampleRate * 0.4F);
         this.recorder = new AudioRecord(6, this.sampleRate, 16, 2, this.bufferSize * 2);
         if (this.recorder.getState() == 0) {
             this.recorder.release();

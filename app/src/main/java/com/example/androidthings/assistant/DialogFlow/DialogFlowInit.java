@@ -4,6 +4,9 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import ai.api.AIDataService;
 import ai.api.AIListener;
 import ai.api.AIServiceException;
@@ -29,12 +32,13 @@ public class DialogFlowInit {
 
     public DialogFlowInit(Context context){
         final AIConfiguration config = new AIConfiguration(DialogFlowContext.CLIENT_ACCESS_TOKEN,
-                AIConfiguration.SupportedLanguages.English,
+                AIConfiguration.SupportedLanguages.ChineseTaiwan,
                 AIConfiguration.RecognitionEngine.System);
         aiService = AIService.getService(context, config);
-//        aiService.setListener(aiListener);
-//        aiService.startListening();
+        aiService.setListener(aiListener);
+        aiService.startListening();
         aiDataService = new AIDataService(config);
+//        setAiRequest("我要出去玩");
     }
 
     public void setAiRequest(String request){
@@ -79,12 +83,31 @@ public class DialogFlowInit {
 
         if(statusCode==200) {
             final String speech = result.getFulfillment().getSpeech();
-            Log.i(TAG, "DialogFlowResponse Speech: " + speech);
+            Log.e(TAG, "DialogFlowResponse Speech: " + speech);
             DialogFlowSpeech(speech);
 
             String action = result.getAction();
             Log.i(TAG, "DialogFlowResponse Action: " + action);
-            DialogFlowAction(action);
+            try {
+                JSONObject jsonObject = null;
+                try {
+                 jsonObject = new JSONObject(""+speech+"");
+                } catch (JSONException e) {
+                    e.printStackTrace(); }
+                if(!speech.contains("{")){
+                    try {
+                    jsonObject = new JSONObject("{"+speech+"}");
+                    } catch (JSONException e) {
+                        e.printStackTrace(); }
+                }else{
+                    jsonObject = new JSONObject(""+speech+"");
+                }
+
+                DialogFlowAction(jsonObject);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
         }else{
             String sss = "Code:"+statusCode+" , errorDetails:"+errorDetails;
                     DialogFlowSpeech(sss);
@@ -95,7 +118,7 @@ public class DialogFlowInit {
     public void DialogFlowSpeech(String speech){
 
     }
-    public void DialogFlowAction(String action){
+    public void DialogFlowAction(JSONObject jsonObject){
 
     }
 

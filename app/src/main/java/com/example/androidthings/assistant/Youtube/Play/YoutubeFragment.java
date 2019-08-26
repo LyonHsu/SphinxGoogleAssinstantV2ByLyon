@@ -1,8 +1,9 @@
 package com.example.androidthings.assistant.Youtube.Play;
 
-import android.os.Bundle;
+
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -73,7 +74,7 @@ public class YoutubeFragment extends Fragment {
         YouTubePlayerSupportFragment youTubePlayerFragment = YouTubePlayerSupportFragment.newInstance();
 
         FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
-        transaction.add(R.id.youtube_layout, youTubePlayerFragment).commit();
+        transaction.replace(R.id.youtube_layout, youTubePlayerFragment).commit();
 
         youTubePlayerFragment.initialize(YoutubeConstants.API_KEY, new YouTubePlayer.OnInitializedListener() {
 
@@ -105,8 +106,10 @@ public class YoutubeFragment extends Fragment {
                         public void onVideoStarted() {
                             Log.d(TAG,"YouTubePlayer onVideoStarted");
 
-                            setOnPrivousShowListener.isPreviounShow(player.hasPrevious());
-                            setOnNextShowListener.isNextShow(player.hasNext());
+                            if(setOnPrivousShowListener!=null)
+                                setOnPrivousShowListener.isPreviounShow(player.hasPrevious());
+                            if(setOnNextShowListener!=null)
+                                setOnNextShowListener.isNextShow(player.hasNext());
                         }
 
                         @Override
@@ -143,16 +146,19 @@ public class YoutubeFragment extends Fragment {
                     player.setPlaybackEventListener(new YouTubePlayer.PlaybackEventListener() {
                         @Override
                         public void onPlaying() {
-                            setPlayPauseShowListener.isPlayPause(true);
+                            if(setPlayPauseShowListener!=null)
+                                setPlayPauseShowListener.isPlayPause(true);
                         }
 
                         @Override
                         public void onPaused() {
+                            if(setPlayPauseShowListener!=null)
                             setPlayPauseShowListener.isPlayPause(false);
                         }
 
                         @Override
                         public void onStopped() {
+                            if(setPlayPauseShowListener!=null)
                             setPlayPauseShowListener.isPlayPause(false);
                         }
 

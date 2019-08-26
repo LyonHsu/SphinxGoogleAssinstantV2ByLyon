@@ -14,7 +14,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
   -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
@@ -35,6 +35,7 @@
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:gravity="center_horizontal"
+        android:layout_below="@+id/network"
         android:id="@+id/controls"
         android:layout_height="wrap_content">
         <Button
@@ -52,11 +53,28 @@
             android:background="@drawable/btn_blue"
             android:text="HTML Output"/>
     </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:orientation="horizontal"
+        android:layout_below="@+id/controls"
+        android:id="@+id/youtubeLayout"
+        >
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/recyclesView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="2"
+            android:padding="15dp"/>
+
+    </LinearLayout>
 
     <FrameLayout
         android:id="@+id/assistantRequestsLayout"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:layout_below="@+id/youtubeLayout"
         android:layout_weight="1">
         <ListView
             android:layout_width="match_parent"
@@ -70,5 +88,11 @@
             android:visibility="gone"
             android:layout_height="match_parent" />
     </FrameLayout>
-
-</LinearLayout>
+    <RelativeLayout
+        android:id="@+id/youtubePlayerFragment"
+        android:layout_width="300dp"
+        android:layout_height="200dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:visibility="visible"/>
+</RelativeLayout>

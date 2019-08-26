@@ -27,8 +27,14 @@ import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.preference.PreferenceManager;
 import android.speech.tts.TextToSpeech;
+import android.support.v4.app.FragmentManager;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
@@ -40,6 +46,7 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.example.androidthings.assistant.DialogFlow.DialogFlowInit;
@@ -51,6 +58,10 @@ import com.example.androidthings.assistant.NetWork.tool.Permission;
 import com.example.androidthings.assistant.Sphinx.CapTechSphinxManager;
 import com.example.androidthings.assistant.TextToSpeech.LyonTextToSpeech;
 import com.example.androidthings.assistant.Tool.ToastUtile;
+import com.example.androidthings.assistant.Youtube.Item;
+import com.example.androidthings.assistant.Youtube.Play.YoutubeFragment;
+import com.example.androidthings.assistant.Youtube.Search.SearchYoutube;
+import com.example.androidthings.assistant.Youtube.YoutubeAdapter;
 import com.example.androidthings.assistant.Youtube.YoutubePlayer;
 import com.example.androidthings.assistant.Youtube.YoutubePoster;
 import com.google.android.things.contrib.driver.button.Button;
@@ -73,7 +84,7 @@ import com.example.androidthings.assistant.Tool.Utils;
 import static com.example.androidthings.assistant.Sphinx.CapTechSphinxManager.ACTIVATION_KEYPHRASE;
 
 
-public class AssistantActivity extends Activity implements Button.OnButtonEventListener, CapTechSphinxManager.SphinxListener {
+public class AssistantActivity extends AppCompatActivity implements Button.OnButtonEventListener, CapTechSphinxManager.SphinxListener {
     private static final String TAG = AssistantActivity.class.getSimpleName();
 
     // Peripheral and drivers constants.
@@ -97,7 +108,7 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
     private Gpio mLed;
     private Max98357A mDac;
 
-    private Handler mMainHandler;
+
 
     // List & adapter to store and display the history of Assistant Requests.
     private EmbeddedAssistant mEmbeddedAssistant;
@@ -116,13 +127,22 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
 
     //Is Use Google AIY Device
     public static boolean isGoogleAIY = false;
-
+    Handler mMainHandler;
     Context context;
     ProgressDialog progressDialog;
     TextToSpeech textToSpeech;
     DialogFlowInit dialogFlowInit;
     String AISay="Yes";
     String openComplete = "開機完畢 你可以使用 " + ACTIVATION_KEYPHRASE + " 來喚醒";
+
+
+    public final int NOTIFYCHANGE=2;
+    List<YoutubePoster> youtubePosters;
+    String nexttoken;
+    LinearLayoutManager mLayoutManager;
+    GridLayoutManager gridLayoutManager;
+    YoutubeAdapter mAdapter;
+    RecyclerView mRecyclerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -448,7 +468,7 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
                 mEmbeddedAssistant.setOnPlayMusiceListener(new EmbeddedAssistant.OnPlayMusiceListener() {
                     @Override
                     public void playMusice(String request, float stability) {
-                        ToastUtile.showText(AssistantActivity.this,request+" 播放音樂！！");
+//                        ToastUtile.showText(AssistantActivity.this,request+" 播放音樂！！");
                         if(dialogFlowInit!=null){
                             dialogFlowInit.setAiRequest(request);
                         }
@@ -461,38 +481,47 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
 //                    LyonTextToSpeech.speak(context,textToSpeech,e.getMessage());
             }
 
+
+
             dialogFlowInit = new DialogFlowInit(this){
                 @Override
                 public void DialogFlowSpeech(String speech) {
                     super.DialogFlowSpeech(speech);
-                    Log.e(TAG, "dialogFlowInit Conversation speech: " + speech );
-                    mAssistantRequestsAdapter.add("DialogFlowInit AIResponse:"+speech);
-                    if(!TextUtils.isEmpty(speech))
-                        LyonTextToSpeech.speak(context,textToSpeech,speech);
-                    if(speech.contains("play") || true){
 
-                        Intent intent = new Intent(AssistantActivity.this, YoutubePlayer.class);
-                        Bundle bundle = new Bundle();
-                        String videoId="OsUr8N7t4zc";
-//                        for(int i=0;i<youtubePosters.size();i++){
-//                            videoId=videoId+","+youtubePosters.get(i).getYoutubeId();
-//                        }
-                        bundle.putString("videoId",videoId);
-                        Log.d(TAG,"videoId:"+videoId);
-                        intent.putExtras(bundle);
-                        startActivity(intent);
-                    }
                 }
 
                 @Override
-                public void DialogFlowAction(String action) {
-                    super.DialogFlowAction(action);
-                    Log.e(TAG, "dialogFlowInit Conversation action: " + action );
-                    if(action.equals("recommend")){
+                public void DialogFlowAction(JSONObject jsonObject) {
+                    super.DialogFlowAction(jsonObject);
+                    if(jsonObject!=null) {
+                        String action = jsonObject.optString("action");
+                        if (!TextUtils.isEmpty(action))
+                            if (action.equals("play_music")) {
+                                String artist = jsonObject.optString("artist");
+                                String song = jsonObject.optString("song");
+                                Log.e(TAG, "DialogFlowAction: 播放:" + artist + " 歌曲:" + song);
+                                Toast.makeText(AssistantActivity.this, "播放:" + artist + " 歌曲:" + song, Toast.LENGTH_LONG).show();
 
+                                searchYoutube(artist + " " + song);
+
+                            }
                     }
                 }
             };
+
+            //youbute
+            youtubePosters = new ArrayList<>();
+
+            mAdapter = new YoutubeAdapter(youtubePosters);
+            mRecyclerView = (RecyclerView) findViewById(R.id.recyclesView);
+            mRecyclerView.setAdapter(mAdapter);
+            mLayoutManager = new LinearLayoutManager(this);
+            mLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
+
+            gridLayoutManager = new GridLayoutManager(this,6);
+
+            mRecyclerView.setLayoutManager(mLayoutManager);
+            mRecyclerView.setHasFixedSize(true);
 
             //instantiate PSphinx
             progressDialog.setMessage("Embedded Sphinx....");
@@ -616,9 +645,21 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
                 e.printStackTrace();
             }
         }
-
-
     }
+
+    private Handler mHandler=new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what) {
+                case NOTIFYCHANGE:
+                    Log.e(TAG,"Youtube NOTIFYCHANGE");
+                    mAdapter.setNotifyDataSetChanged(youtubePosters);
+                    playYoutube(0);
+                    break;
+            }
+        }
+    };
 
     private void LEDShining(){
         Log.e(TAG, "mLed LEDShining");
@@ -651,6 +692,72 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
     }
 
 
+    private Item toItem(int Type , String sss){
+        Item itme = new Item();
+        itme.Type=Type;
+        itme.sss=sss;
+        return itme;
+    }
 
+
+    private void searchYoutube(String keyWord){
+        new SearchYoutube(keyWord){
+            public void YoutubePosters(List<YoutubePoster> posters){
+                Log.d(TAG,"YoutubeAdapter searchBtn onClick: YoutubePosters size:"+posters.size());
+                youtubePosters = posters;
+
+                Message msg = mHandler.obtainMessage();
+                msg.what=NOTIFYCHANGE;
+                msg.obj=youtubePosters;
+                mHandler.sendMessage(msg);
+            }
+
+            @Override
+            public void getNextPageToken(String NextPageToken) {
+                nexttoken=NextPageToken;
+            }
+
+            @Override
+            public void getPrevPageToken(String PextPageToken) {
+
+            }
+        }.execute();
+    }
+
+    private void playYoutube(int position){
+        Log.e(TAG,"Youtube playYoutube() ");
+        YoutubePoster youtubePoster = youtubePosters.get(position);
+        Log.d(TAG,"Youtube playYoutube YoutubePoster:"+youtubePoster.getTitle());
+        String videoId=youtubePoster.getYoutubeId();
+        for(int i=0;i<youtubePosters.size();i++){
+            videoId=videoId+","+youtubePosters.get(i).getYoutubeId();
+        }
+
+        RelativeLayout youtubePlayerFragment = (RelativeLayout) findViewById(R.id.youtubePlayerFragment);
+        youtubePlayerFragment.setVisibility(View.VISIBLE);
+        Bundle bundle = new Bundle();
+        bundle.putString("videoId",videoId);
+        Log.d(TAG,"videoId:"+videoId);
+        final YoutubeFragment fragment = new YoutubeFragment();
+        fragment.setArguments(bundle);
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        fragmentManager.beginTransaction()
+                .replace(R.id.youtubePlayerFragment, fragment)
+                .commit();
+
+        fragment.setPlayPauseBtnStatsListener(new YoutubeFragment.setPlayPauseShowListener() {
+            @Override
+            public boolean isPlayPause(boolean playing) {
+//                if(playing){
+//                    PlayPauseBtn.setText("playing");
+//                }else{
+//                    PlayPauseBtn.setText("pause");
+//                }
+
+                return false;
+            }
+        });
+
+    }
 
 }

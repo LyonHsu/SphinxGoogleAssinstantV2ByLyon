@@ -1,8 +1,9 @@
 package com.example.androidthings.assistant.Youtube;
 
+
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.RelativeLayout;
@@ -15,7 +16,7 @@ import com.example.androidthings.assistant.Youtube.Play.YoutubeFragment;
  * adb shell pm uninstall -k com.google.android.youtube
  */
 
-public class YoutubePlayer extends FragmentActivity {
+public class YoutubePlayer extends AppCompatActivity {
     public String VIDEO_ID = "OsUr8N7t4zc";
     Button previousBtn ,loopBtn ,NextBtn ,PlayPauseBtn;
     private YoutubeFragment.setOnPrivousShowListener setOnPrivousShowListener = null;

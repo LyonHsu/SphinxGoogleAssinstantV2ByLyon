@@ -42,7 +42,7 @@ public class CapTechSphinxManager implements RecognitionListener {
         void onActivationPhraseDetected();
     }
 
-    public static final String ACTIVATION_KEYPHRASE = "hey glenda"; //glenda ???? G L EH N D AH
+    public static final String ACTIVATION_KEYPHRASE = "hey friday"; //friday ???? F R AY D IY
     private static final String WAKEUP_SEARCH = "wakeup";
 
     private final SphinxListener mSphinxListener;

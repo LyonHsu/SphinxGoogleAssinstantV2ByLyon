@@ -498,7 +498,7 @@ public class AssistantActivity extends AppCompatActivity implements Button.OnBut
                         if (!TextUtils.isEmpty(action))
                             if (action.equals("play_music")) {
                                 String artist = jsonObject.optString("artist");
-                                String song = jsonObject.optString("song");
+                                String song = jsonObject.optString("any");
                                 Log.e(TAG, "DialogFlowAction: 播放:" + artist + " 歌曲:" + song);
                                 Toast.makeText(AssistantActivity.this, "播放:" + artist + " 歌曲:" + song, Toast.LENGTH_LONG).show();
 

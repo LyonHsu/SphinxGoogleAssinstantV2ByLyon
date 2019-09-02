@@ -44,7 +44,7 @@ public class CapTechSphinxManager implements RecognitionListener {
     //mah ???? M AA
     //moderate ???? M AA D ER AH T
     //fucker ???? F AH K ER
-    public static final String ACTIVATION_KEYPHRASE = "fu lai day"; //friday ???? F R AY D IY ??? F UW L AY D EY
+    public static final String ACTIVATION_KEYPHRASE = "hey friday"; //friday ???? F R AY D IY ??? F UW L AY D EY
     private static final String WAKEUP_SEARCH = "wakeup";
 
     private final SphinxListener mSphinxListener;

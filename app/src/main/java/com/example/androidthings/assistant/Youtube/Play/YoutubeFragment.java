@@ -1,7 +1,13 @@
 package com.example.androidthings.assistant.Youtube.Play;
 
 
+import android.content.Context;
 import android.content.Intent;
+import android.media.AudioDeviceInfo;
+import android.media.AudioFormat;
+import android.media.AudioManager;
+import android.media.AudioRecord;
+import android.media.AudioTrack;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.os.Bundle;
@@ -11,6 +17,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.example.androidthings.assistant.AssistantActivity;
 import com.example.androidthings.assistant.R;
 import com.example.androidthings.assistant.Youtube.YoutubeConstants;
 import com.google.android.youtube.player.YouTubeInitializationResult;
@@ -19,6 +26,8 @@ import com.google.android.youtube.player.YouTubePlayerSupportFragment;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import edu.cmu.pocketsphinx.Decoder;
 
 
 /**
@@ -293,4 +302,6 @@ public class YoutubeFragment extends Fragment {
     public void setPlayPauseBtnStatsListener(setPlayPauseShowListener listener){
         this.setPlayPauseShowListener = listener;
     }
+
+
 }

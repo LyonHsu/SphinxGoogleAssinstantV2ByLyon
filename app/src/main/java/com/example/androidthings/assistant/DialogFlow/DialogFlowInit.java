@@ -4,6 +4,8 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.google.assistant.embedded.v1alpha2.AssistResponse;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -29,7 +31,7 @@ public class DialogFlowInit {
     AIRequest aiRequest;
     AIDataService aiDataService;
     AIService aiService;
-
+    AssistResponse assistResponse;
     public DialogFlowInit(Context context){
         final AIConfiguration config = new AIConfiguration(DialogFlowContext.CLIENT_ACCESS_TOKEN,
                 AIConfiguration.SupportedLanguages.ChineseTaiwan,
@@ -41,10 +43,11 @@ public class DialogFlowInit {
 //        setAiRequest("我要出去玩");
     }
 
-    public void setAiRequest(String request){
+    public void setAiRequest(AssistResponse assistResponse, String request){
         if(aiRequest==null){
             aiRequest = new AIRequest();
         }
+        this.assistResponse=assistResponse;
         aiRequest.setQuery(request);
         new AsyncTask<AIRequest, Void, AIResponse>() {
             @Override
@@ -103,7 +106,7 @@ public class DialogFlowInit {
                     jsonObject = new JSONObject(""+speech+"");
                 }
 
-                DialogFlowAction(jsonObject);
+                DialogFlowAction(assistResponse, jsonObject);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -118,7 +121,7 @@ public class DialogFlowInit {
     public void DialogFlowSpeech(String speech){
 
     }
-    public void DialogFlowAction(JSONObject jsonObject){
+    public void DialogFlowAction(AssistResponse assistResponse, JSONObject jsonObject){
 
     }
 

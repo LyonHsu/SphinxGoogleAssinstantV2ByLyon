@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.media.AudioAttributes;
 import android.media.AudioDeviceInfo;
 import android.media.AudioManager;
 import android.os.Build;
@@ -68,11 +69,16 @@ import com.google.android.things.contrib.driver.button.Button;
 import com.google.android.things.contrib.driver.voicehat.Max98357A;
 import com.google.android.things.contrib.driver.voicehat.VoiceHat;
 import com.google.android.things.pio.Gpio;
+import com.google.assistant.embedded.v1alpha2.AssistConfig;
+import com.google.assistant.embedded.v1alpha2.AssistResponse;
+import com.google.assistant.embedded.v1alpha2.AudioOutConfig;
+import com.google.assistant.embedded.v1alpha2.DeviceConfig;
 import com.google.assistant.embedded.v1alpha2.SpeechRecognitionResult;
 import com.google.auth.oauth2.UserCredentials;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
@@ -87,10 +93,14 @@ import static com.example.androidthings.assistant.Sphinx.CapTechSphinxManager.AC
 public class AssistantActivity extends AppCompatActivity implements Button.OnButtonEventListener, CapTechSphinxManager.SphinxListener {
     private static final String TAG = AssistantActivity.class.getSimpleName();
 
+    //Is Use Google AIY Device
+    public static boolean isGoogleAIY = false;
+
+
     // Peripheral and drivers constants.
     private static final int BUTTON_DEBOUNCE_DELAY_MS = 20;
     // Default on using the Voice Hat on Raspberry Pi 3.
-    private static final boolean USE_VOICEHAT_I2S_DAC = Build.DEVICE.equals(BoardDefaults.DEVICE_RPI3);
+    public static final boolean USE_VOICEHAT_I2S_DAC = Build.DEVICE.equals(BoardDefaults.DEVICE_RPI3);
 
     // Audio constants.
     private static final String PREF_CURRENT_VOLUME = "current_volume";
@@ -125,8 +135,7 @@ public class AssistantActivity extends AppCompatActivity implements Button.OnBut
     //NetWork
     NetWork netWork;
 
-    //Is Use Google AIY Device
-    public static boolean isGoogleAIY = false;
+
     Handler mMainHandler;
     Context context;
     ProgressDialog progressDialog;
@@ -143,7 +152,7 @@ public class AssistantActivity extends AppCompatActivity implements Button.OnBut
     GridLayoutManager gridLayoutManager;
     YoutubeAdapter mAdapter;
     RecyclerView mRecyclerView;
-
+    YoutubeFragment youtubeFragment;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -163,8 +172,14 @@ public class AssistantActivity extends AppCompatActivity implements Button.OnBut
 //                        int result = textToSpeech.setLanguage(Locale.getDefault());//Locale.);
                         textToSpeech.setPitch(1.0f); // 音調
                         textToSpeech.setSpeechRate(1.0f); // 速度
-                        int result = textToSpeech.setLanguage(Locale.US);
-                        textToSpeech.speak(openComplete, TextToSpeech.QUEUE_FLUSH, null);
+
+
+
+                        int result = textToSpeech.setLanguage(Locale.getDefault());
+                        HashMap myHash = new HashMap<String, String>();
+                        myHash.put(TextToSpeech.Engine.KEY_PARAM_STREAM,
+                                String.valueOf(AudioManager.MODE_NORMAL));
+                        textToSpeech.speak(openComplete, TextToSpeech.QUEUE_FLUSH, myHash);
                         Log.d(TAG, "getTextToSpeech speak result init:" + result);
 
 
@@ -179,6 +194,17 @@ public class AssistantActivity extends AppCompatActivity implements Button.OnBut
             //設定音量
             int systemName = AudioManager.STREAM_SYSTEM;
             AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
+
+            /**
+            *MODE_NORMAL : 普通模式，既不是鈴聲模式也不是通話模式
+             * MODE_RINGTONE : 鈴聲模式
+             * MODE_IN_CALL : 通話模式
+             * MODE_IN_COMMUNICATION : 通訊模式，包括音/視訊,VoIP通話.(3.0加入的，與通話模式類似)
+             */
+//            audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+            audioManager.setSpeakerphoneOn(true);
+
+
             int maVolume = audioManager.getStreamMaxVolume(systemName);
             audioManager.setStreamVolume(systemName,maVolume,AudioManager.FLAG_SHOW_UI );
             systemName = AudioManager.STREAM_MUSIC;//STREAM_RING
@@ -467,10 +493,10 @@ public class AssistantActivity extends AppCompatActivity implements Button.OnBut
                 mEmbeddedAssistant.connect();
                 mEmbeddedAssistant.setOnPlayMusiceListener(new EmbeddedAssistant.OnPlayMusiceListener() {
                     @Override
-                    public void playMusice(String request, float stability) {
+                    public void playMusice(AssistResponse assistResponse, String request, float stability) {
 //                        ToastUtile.showText(AssistantActivity.this,request+" 播放音樂！！");
                         if(dialogFlowInit!=null){
-                            dialogFlowInit.setAiRequest(request);
+                            dialogFlowInit.setAiRequest(assistResponse, request);
                         }
                     }
                 });
@@ -491,20 +517,37 @@ public class AssistantActivity extends AppCompatActivity implements Button.OnBut
                 }
 
                 @Override
-                public void DialogFlowAction(JSONObject jsonObject) {
-                    super.DialogFlowAction(jsonObject);
+                public void DialogFlowAction(AssistResponse assistResponse, JSONObject jsonObject) {
+                    super.DialogFlowAction(assistResponse, jsonObject);
+                    boolean isSpecialRequest = false;
                     if(jsonObject!=null) {
                         String action = jsonObject.optString("action");
-                        if (!TextUtils.isEmpty(action))
+                        if (!TextUtils.isEmpty(action)) {
                             if (action.equals("play_music")) {
+                                isSpecialRequest = true;
                                 String artist = jsonObject.optString("artist");
                                 String song = jsonObject.optString("any");
                                 Log.e(TAG, "DialogFlowAction: 播放:" + artist + " 歌曲:" + song);
                                 Toast.makeText(AssistantActivity.this, "播放:" + artist + " 歌曲:" + song, Toast.LENGTH_LONG).show();
-
                                 searchYoutube(artist + " " + song);
-
+                            }else if(action.equals("stop_music")){
+                                isSpecialRequest = true;
+                                youtubeFragment.setPause();
+                                Toast.makeText(AssistantActivity.this, "播放暫停" , Toast.LENGTH_LONG).show();
+                            }else if(action.equals("next_music")){
+                                isSpecialRequest = true;
+                                youtubeFragment.setNext();
+                                Toast.makeText(AssistantActivity.this, "播放下一首" , Toast.LENGTH_LONG).show();
+                            }else if(action.equals("previous_music")){
+                                isSpecialRequest = true;
+                                youtubeFragment.setPrevious();
+                                Toast.makeText(AssistantActivity.this, "播放上一首" , Toast.LENGTH_LONG).show();
                             }
+                        }
+                    }
+
+                    if(!isSpecialRequest){
+                        mEmbeddedAssistant.callAssistantResponse(assistResponse);
                     }
                 }
             };
@@ -738,14 +781,14 @@ public class AssistantActivity extends AppCompatActivity implements Button.OnBut
         Bundle bundle = new Bundle();
         bundle.putString("videoId",videoId);
         Log.d(TAG,"videoId:"+videoId);
-        final YoutubeFragment fragment = new YoutubeFragment();
-        fragment.setArguments(bundle);
+        youtubeFragment = new YoutubeFragment();
+        youtubeFragment.setArguments(bundle);
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction()
-                .replace(R.id.youtubePlayerFragment, fragment)
+                .replace(R.id.youtubePlayerFragment, youtubeFragment)
                 .commit();
 
-        fragment.setPlayPauseBtnStatsListener(new YoutubeFragment.setPlayPauseShowListener() {
+        youtubeFragment.setPlayPauseBtnStatsListener(new YoutubeFragment.setPlayPauseShowListener() {
             @Override
             public boolean isPlayPause(boolean playing) {
 //                if(playing){

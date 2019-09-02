@@ -59,6 +59,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+
+//https://www.jianshu.com/p/632dce664c3d
+
 public class EmbeddedAssistant {
     private static final String TAG = EmbeddedAssistant.class.getSimpleName();
     private static final boolean DEBUG = true;
@@ -175,7 +178,7 @@ public class EmbeddedAssistant {
                         if (DEBUG ||true ) {
 //                            Log.d(TAG, "Received response Conversation mConversationState: " + mConversationState.toString());
                             List<SpeechRecognitionResult> results = value.getSpeechResultsList();
-                            boolean isSpecialRequest = false;
+//                            boolean isSpecialRequest = false;
                             for (final SpeechRecognitionResult result : results) {
                                 String conversationText = result.getTranscript();
                                 float conversationStability =  result.getStability();
@@ -185,36 +188,36 @@ public class EmbeddedAssistant {
 
 //                                    if(conversationText.contains("音樂") ||conversationText.contains("周杰倫")){
                                         if(onPlayMusiceListener!=null)
-                                            onPlayMusiceListener.playMusice(conversationText,conversationStability);
+                                            onPlayMusiceListener.playMusice(value, conversationText,conversationStability);
                                         Log.e(TAG, "Received response Conversation return: " + conversationText +
                                                 " stability: " + conversationStability);
-                                        isSpecialRequest = true;
+//                                        isSpecialRequest = true;
                                         stopConversation();
 //                                    }
                                 }
                             }
-                            if(!isSpecialRequest){
-                                if (value.getDialogStateOut().getVolumePercentage() != 0) {
-                                    final int volumePercentage = value.getDialogStateOut().getVolumePercentage();
-                                    mVolume = volumePercentage;
-                                    mConversationHandler.post(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            Log.d(TAG,"Received response VolumeChanged :"+volumePercentage);
-                                            mConversationCallback.onVolumeChanged(volumePercentage);
-                                        }
-                                    });
-                                }
-                                mRequestHandler.post(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        mRequestCallback.onSpeechRecognition(value.getSpeechResultsList());
-                                    }
-                                });
-                                mMicrophoneMode = value.getDialogStateOut().getMicrophoneMode();
-                                mConversationCallback.onAssistantResponse(value.getDialogStateOut()
-                                        .getSupplementalDisplayText());
-                            }
+//                            if(!isSpecialRequest){
+//                                if (value.getDialogStateOut().getVolumePercentage() != 0) {
+//                                    final int volumePercentage = value.getDialogStateOut().getVolumePercentage();
+//                                    mVolume = volumePercentage;
+//                                    mConversationHandler.post(new Runnable() {
+//                                        @Override
+//                                        public void run() {
+//                                            Log.d(TAG,"Received response VolumeChanged :"+volumePercentage);
+//                                            mConversationCallback.onVolumeChanged(volumePercentage);
+//                                        }
+//                                    });
+//                                }
+//                                mRequestHandler.post(new Runnable() {
+//                                    @Override
+//                                    public void run() {
+//                                        mRequestCallback.onSpeechRecognition(value.getSpeechResultsList());
+//                                    }
+//                                });
+//                                mMicrophoneMode = value.getDialogStateOut().getMicrophoneMode();
+//                                mConversationCallback.onAssistantResponse(value.getDialogStateOut()
+//                                        .getSupplementalDisplayText());
+//                            }
                         }
 
                     }
@@ -843,11 +846,35 @@ public class EmbeddedAssistant {
     private OnPlayMusiceListener onPlayMusiceListener = null;
     //define interface
     public static interface OnPlayMusiceListener {
-        void playMusice(String request,float stability);
+        void playMusice(AssistResponse assistResponse, String request,float stability);
     }
 
     public void setOnPlayMusiceListener(OnPlayMusiceListener listener) {
         this.onPlayMusiceListener = listener;
+    }
+
+    public void callAssistantResponse(AssistResponse value){
+        if (value.getDialogStateOut().getVolumePercentage() != 0) {
+            final int volumePercentage = value.getDialogStateOut().getVolumePercentage();
+            mVolume = volumePercentage;
+            mConversationHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    Log.d(TAG,"Received response VolumeChanged :"+volumePercentage);
+                    mConversationCallback.onVolumeChanged(volumePercentage);
+                }
+            });
+        }
+        mRequestHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                mRequestCallback.onSpeechRecognition(value.getSpeechResultsList());
+            }
+        });
+        mMicrophoneMode = value.getDialogStateOut().getMicrophoneMode();
+        mConversationCallback.onAssistantResponse(value.getDialogStateOut()
+                .getSupplementalDisplayText());
+
     }
 
 

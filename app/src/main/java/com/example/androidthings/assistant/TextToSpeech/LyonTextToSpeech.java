@@ -1,15 +1,23 @@
 package com.example.androidthings.assistant.TextToSpeech;
 
 import android.content.Context;
+import android.media.AudioDeviceInfo;
+import android.media.AudioFormat;
+import android.media.AudioManager;
+import android.media.AudioTrack;
 import android.os.Build;
 import android.speech.tts.TextToSpeech;
+import android.speech.tts.Voice;
 import android.util.Log;
 
+import com.example.androidthings.assistant.AssistantActivity;
 import com.example.androidthings.assistant.Tool.ToastUtile;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
+
+import edu.cmu.pocketsphinx.Decoder;
 
 public class LyonTextToSpeech {
     static String TAG = LyonTextToSpeech.class.getSimpleName();
@@ -44,13 +52,17 @@ public class LyonTextToSpeech {
              * 返回值：int SUCCESS = 0，int ERROR = -1。
              */
             final HashMap<String, String> params = new HashMap<>();
-            params.put("KEY_PARAM_STREAM","STREAM_NOTIFICATION");
-            params.put("KEY_PARAM_VOLUME","0.8f");
+            params.put(TextToSpeech.Engine.KEY_PARAM_STREAM,
+                    String.valueOf(AudioManager.STREAM_MUSIC));
+
+            AudioManager audioManager =(AudioManager) context.getSystemService(context.AUDIO_SERVICE);
 
             if (i == 0) {
                 isSpeak = textToSpeech.speak(arrayList.get(i).get("word"), TextToSpeech.QUEUE_FLUSH, params);
             } else
                 isSpeak = textToSpeech.speak(arrayList.get(i).get("word"), TextToSpeech.QUEUE_ADD, params);
+
+
 
             if(isSpeak == TextToSpeech.ERROR){
                 Log.e(TAGG,"\""+arrayList.get(i).get("word")+"\" speak isSpeak:ERROR");

@@ -153,6 +153,9 @@ public class AssistantActivity extends AppCompatActivity implements Button.OnBut
     YoutubeAdapter mAdapter;
     RecyclerView mRecyclerView;
     YoutubeFragment youtubeFragment;
+
+    boolean isSpecialRequest = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -205,7 +208,7 @@ public class AssistantActivity extends AppCompatActivity implements Button.OnBut
             audioManager.setSpeakerphoneOn(true);
 
 
-            int maVolume = audioManager.getStreamMaxVolume(systemName);
+            int maVolume = audioManager.getStreamMaxVolume(systemName)/2;
             audioManager.setStreamVolume(systemName,maVolume,AudioManager.FLAG_SHOW_UI );
             systemName = AudioManager.STREAM_MUSIC;//STREAM_RING
             maVolume = audioManager.getStreamMaxVolume(systemName);
@@ -519,7 +522,7 @@ public class AssistantActivity extends AppCompatActivity implements Button.OnBut
                 @Override
                 public void DialogFlowAction(AssistResponse assistResponse, JSONObject jsonObject) {
                     super.DialogFlowAction(assistResponse, jsonObject);
-                    boolean isSpecialRequest = false;
+
                     if(jsonObject!=null) {
                         String action = jsonObject.optString("action");
                         if (!TextUtils.isEmpty(action)) {
@@ -546,8 +549,12 @@ public class AssistantActivity extends AppCompatActivity implements Button.OnBut
                         }
                     }
 
-                    if(!isSpecialRequest){
-                        mEmbeddedAssistant.callAssistantResponse(assistResponse);
+                    if(isSpecialRequest){
+                        Log.e(TAG,"====== stop Assistant Request ======");
+                        mEmbeddedAssistant.stopConversation(isSpecialRequest);
+                    }else {
+                        Log.e(TAG,"====== callAssistantResponse ======");
+                        mEmbeddedAssistant.callAssistantResponse(assistResponse, isSpecialRequest);
                     }
                 }
             };

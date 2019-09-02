@@ -117,97 +117,104 @@ public class YoutubeFragment extends Fragment {
                 // YouTubeプレーヤーの初期化成功
                 @Override
                 public void onInitializationSuccess(YouTubePlayer.Provider provider, final YouTubePlayer player, boolean wasRestored) {
-                    if (!wasRestored) {
-                        yooutPlayer=player;
-                        player.setPlayerStyle(YouTubePlayer.PlayerStyle.DEFAULT);
-                        player.loadVideos(VIDEO_ID2);
-                        player.play();
-                        player.setPlayerStateChangeListener(new YouTubePlayer.PlayerStateChangeListener() {
-                            @Override
-                            public void onLoading() {
-                                Log.d(TAG,"YouTubePlayer onLoading");
-                            }
-
-                            @Override
-                            public void onLoaded(String s) {
-                                Log.d(TAG,"YouTubePlayer onLoaded");
-                            }
-
-                            @Override
-                            public void onAdStarted() {
-                                Log.d(TAG,"YouTubePlayer onAdStarted");
-                            }
-
-                            @Override
-                            public void onVideoStarted() {
-                                Log.d(TAG,"YouTubePlayer onVideoStarted");
-
-                                if(setOnPrivousShowListener!=null)
-                                    setOnPrivousShowListener.isPreviounShow(player.hasPrevious());
-                                if(setOnNextShowListener!=null)
-                                    setOnNextShowListener.isNextShow(player.hasNext());
-                            }
-
-                            @Override
-                            public void onVideoEnded() {
-                                Log.d(TAG,"YouTubePlayer onVideoEnded player.hasNext():"+player.hasNext());
-                                Log.d(TAG,"YouTubePlayer onVideoEnded isLoop:"+isLoop);
-                                if (isLoop) {
-                                    Log.d(TAG, " loop play");
-                                    if(player.hasPrevious()) {
-                                        Log.d(TAG, " loop play+" + player.hasPrevious());
-                                        player.previous();
-                                    }
-                                    else{
-                                        Log.d(TAG, " loop play+"+player.hasPrevious());
-                                        player.play();
-                                    }
+                    if(VIDEO_ID2==null) {
+                        Log.e(TAG,"YouTubePlayer VIDEO_ID2 == null");
+                        return;
+                    }
+                    try {
+                        if (!wasRestored) {
+                            yooutPlayer = player;
+                            player.setPlayerStyle(YouTubePlayer.PlayerStyle.DEFAULT);
+                            player.loadVideos(VIDEO_ID2);
+                            player.play();
+                            player.setPlayerStateChangeListener(new YouTubePlayer.PlayerStateChangeListener() {
+                                @Override
+                                public void onLoading() {
+                                    Log.d(TAG, "YouTubePlayer onLoading");
                                 }
-                                //                            if(player.hasNext()) {
-                                //                                player.next();
-                                //                                Log.d(TAG,"play next id:"+VIDEO_ID2.get())
-                                //                            }
-                                //                            else{
-                                //
-                                //                            }
 
-                            }
+                                @Override
+                                public void onLoaded(String s) {
+                                    Log.d(TAG, "YouTubePlayer onLoaded");
+                                }
 
-                            @Override
-                            public void onError(YouTubePlayer.ErrorReason errorReason) {
-                                Log.e(TAG,"YouTubePlayer errorReason:"+errorReason);
-                            }
-                        });
+                                @Override
+                                public void onAdStarted() {
+                                    Log.d(TAG, "YouTubePlayer onAdStarted");
+                                }
 
-                        player.setPlaybackEventListener(new YouTubePlayer.PlaybackEventListener() {
-                            @Override
-                            public void onPlaying() {
-                                if(setPlayPauseShowListener!=null)
-                                    setPlayPauseShowListener.isPlayPause(true);
-                            }
+                                @Override
+                                public void onVideoStarted() {
+                                    Log.d(TAG, "YouTubePlayer onVideoStarted");
 
-                            @Override
-                            public void onPaused() {
-                                if(setPlayPauseShowListener!=null)
-                                    setPlayPauseShowListener.isPlayPause(false);
-                            }
+                                    if (setOnPrivousShowListener != null)
+                                        setOnPrivousShowListener.isPreviounShow(player.hasPrevious());
+                                    if (setOnNextShowListener != null)
+                                        setOnNextShowListener.isNextShow(player.hasNext());
+                                }
 
-                            @Override
-                            public void onStopped() {
-                                if(setPlayPauseShowListener!=null)
-                                    setPlayPauseShowListener.isPlayPause(false);
-                            }
+                                @Override
+                                public void onVideoEnded() {
+                                    Log.d(TAG, "YouTubePlayer onVideoEnded player.hasNext():" + player.hasNext());
+                                    Log.d(TAG, "YouTubePlayer onVideoEnded isLoop:" + isLoop);
+                                    if (isLoop) {
+                                        Log.d(TAG, " loop play");
+                                        if (player.hasPrevious()) {
+                                            Log.d(TAG, " loop play+" + player.hasPrevious());
+                                            player.previous();
+                                        } else {
+                                            Log.d(TAG, " loop play+" + player.hasPrevious());
+                                            player.play();
+                                        }
+                                    }
+                                    //                            if(player.hasNext()) {
+                                    //                                player.next();
+                                    //                                Log.d(TAG,"play next id:"+VIDEO_ID2.get())
+                                    //                            }
+                                    //                            else{
+                                    //
+                                    //                            }
 
-                            @Override
-                            public void onBuffering(boolean b) {
+                                }
 
-                            }
+                                @Override
+                                public void onError(YouTubePlayer.ErrorReason errorReason) {
+                                    Log.e(TAG, "YouTubePlayer errorReason:" + errorReason);
+                                }
+                            });
 
-                            @Override
-                            public void onSeekTo(int i) {
+                            player.setPlaybackEventListener(new YouTubePlayer.PlaybackEventListener() {
+                                @Override
+                                public void onPlaying() {
+                                    if (setPlayPauseShowListener != null)
+                                        setPlayPauseShowListener.isPlayPause(true);
+                                }
 
-                            }
-                        });
+                                @Override
+                                public void onPaused() {
+                                    if (setPlayPauseShowListener != null)
+                                        setPlayPauseShowListener.isPlayPause(false);
+                                }
+
+                                @Override
+                                public void onStopped() {
+                                    if (setPlayPauseShowListener != null)
+                                        setPlayPauseShowListener.isPlayPause(false);
+                                }
+
+                                @Override
+                                public void onBuffering(boolean b) {
+
+                                }
+
+                                @Override
+                                public void onSeekTo(int i) {
+
+                                }
+                            });
+                        }
+                    }catch (NullPointerException e){
+                        e.printStackTrace();
                     }
                 }
 

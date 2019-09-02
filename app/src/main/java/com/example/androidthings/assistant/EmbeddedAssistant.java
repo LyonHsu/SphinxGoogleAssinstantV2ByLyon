@@ -99,6 +99,8 @@ public class EmbeddedAssistant {
     private Handler mAssistantHandler;
     private ArrayList<ByteBuffer> mAssistantResponses = new ArrayList<>();
 
+    private boolean isSpecialRequest = false;
+
     // gRPC client and stream observers.
     private int mAudioOutSize; // Tracks the size of audio responses to determine when it ends.
     private EmbeddedAssistantGrpc.EmbeddedAssistantStub mAssistantService;
@@ -174,6 +176,7 @@ public class EmbeddedAssistant {
                         });
                     }
                     if (value.getDialogStateOut() != null) {
+                        Log.e(TAG,"\n value.getDialogStateOut() != null\n");
                         mConversationState = value.getDialogStateOut().getConversationState();
                         if (DEBUG ||true ) {
 //                            Log.d(TAG, "Received response Conversation mConversationState: " + mConversationState.toString());
@@ -186,14 +189,13 @@ public class EmbeddedAssistant {
                                     Log.i(TAG, "Received response Conversation request text: " + conversationText +
                                             " stability: " + conversationStability);
 
-//                                    if(conversationText.contains("音樂") ||conversationText.contains("周杰倫")){
                                         if(onPlayMusiceListener!=null)
                                             onPlayMusiceListener.playMusice(value, conversationText,conversationStability);
                                         Log.e(TAG, "Received response Conversation return: " + conversationText +
                                                 " stability: " + conversationStability);
 //                                        isSpecialRequest = true;
-                                        stopConversation();
-//                                    }
+
+//
                                 }
                             }
 //                            if(!isSpecialRequest){
@@ -219,12 +221,13 @@ public class EmbeddedAssistant {
 //                                        .getSupplementalDisplayText());
 //                            }
                         }
-
                     }
-                    if (value.getAudioOut() != null) {
+                    if (value.getAudioOut() != null && !isSpecialRequest) {
+
                         if (mAudioOutSize <= value.getAudioOut().getSerializedSize()) {
                             mAudioOutSize = value.getAudioOut().getSerializedSize();
                         } else {
+                            Log.e(TAG,"\n value.getAudioOut() != null\n");
                             mAudioOutSize = 0;
                             onCompleted();
                         }
@@ -360,6 +363,7 @@ public class EmbeddedAssistant {
      * Starts a request to the Assistant.
      */
     public void startConversation() {
+        isSpecialRequest=false;
         mAudioRecord.startRecording();
         mRequestHandler.post(new Runnable() {
             @Override
@@ -427,7 +431,8 @@ public class EmbeddedAssistant {
     /**
      * Manually ends a conversation with the Assistant.
      */
-    public void stopConversation() {
+    public void stopConversation(boolean isSpecialRequest) {
+        this.isSpecialRequest=isSpecialRequest;
         mAssistantHandler.post(new Runnable() {
             @Override
             public void run() {
@@ -853,27 +858,51 @@ public class EmbeddedAssistant {
         this.onPlayMusiceListener = listener;
     }
 
-    public void callAssistantResponse(AssistResponse value){
-        if (value.getDialogStateOut().getVolumePercentage() != 0) {
-            final int volumePercentage = value.getDialogStateOut().getVolumePercentage();
-            mVolume = volumePercentage;
+    public void callAssistantResponse(AssistResponse value ,boolean isSpecialRequest){
+        this.isSpecialRequest=isSpecialRequest;
+        if (value.getDialogStateOut() != null) {
+            Log.e(TAG, "\n\n callAssistantResponse value.getDialogStateOut() != null \n\n");
+            mConversationState = value.getDialogStateOut().getConversationState();
+            if (value.getDialogStateOut().getVolumePercentage() != 0) {
+                final int volumePercentage = value.getDialogStateOut().getVolumePercentage();
+                mVolume = volumePercentage;
+                mConversationHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        Log.d(TAG, "Received response VolumeChanged :" + volumePercentage);
+                        mConversationCallback.onVolumeChanged(volumePercentage);
+                    }
+                });
+            }
+            mRequestHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mRequestCallback.onSpeechRecognition(value.getSpeechResultsList());
+                }
+            });
+            mMicrophoneMode = value.getDialogStateOut().getMicrophoneMode();
+            mConversationCallback.onAssistantResponse(value.getDialogStateOut()
+                    .getSupplementalDisplayText());
+        }
+
+        if (value.getAudioOut() != null) {
+            Log.e(TAG,"\n callAssistantResponse value.getAudioOut() != null\n");
+            if (mAudioOutSize <= value.getAudioOut().getSerializedSize()) {
+                mAudioOutSize = value.getAudioOut().getSerializedSize();
+            } else {
+                mAudioOutSize = 0;
+                mAssistantRequestObserver.onCompleted();
+            }
+            final ByteBuffer audioData =
+                    ByteBuffer.wrap(value.getAudioOut().getAudioData().toByteArray());
+            mAssistantResponses.add(audioData);
             mConversationHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    Log.d(TAG,"Received response VolumeChanged :"+volumePercentage);
-                    mConversationCallback.onVolumeChanged(volumePercentage);
+                    mConversationCallback.onAudioSample(audioData);
                 }
             });
         }
-        mRequestHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                mRequestCallback.onSpeechRecognition(value.getSpeechResultsList());
-            }
-        });
-        mMicrophoneMode = value.getDialogStateOut().getMicrophoneMode();
-        mConversationCallback.onAssistantResponse(value.getDialogStateOut()
-                .getSupplementalDisplayText());
 
     }
 

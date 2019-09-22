@@ -165,6 +165,7 @@ public class AssistantActivity extends AppCompatActivity implements Button.OnBut
     final int REQUEST_ENABLE_BT = 100;
     private static final int REQUEST_CODE = 2; // 请求码
     public static int OVERLAY_PERMISSION_REQ_CODE = 1234;
+    private android.widget.Button blueToothBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -876,6 +877,16 @@ public class AssistantActivity extends AppCompatActivity implements Button.OnBut
         String blueDate = "bluetooth Name:" + bluetoothTool.getBluetoothName("Lyon Smart Box Pi3_" + Build.MODEL) + ",   Mac:" + bluetoothTool.getBluetoothMac();
         bluetoothTool.findBuletoothDevice();
         bluetoothTool.openBlueTooth();
+
+        blueToothBtn = findViewById(R.id.blueToothBtn);
+        blueToothBtn.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(bluetoothTool!=null) {
+                    bluetoothTool.openBlueTooth();
+                }
+            }
+        });
     }
 
     private Handler handler = new Handler() {

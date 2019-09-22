@@ -51,7 +51,16 @@
             android:layout_marginStart="32dp"
             android:id="@+id/htmlOutput"
             android:background="@drawable/btn_blue"
+            android:visibility="gone"
             android:text="HTML Output"/>
+
+        <Button
+            android:id="@+id/blueToothBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:background="@drawable/btn_blue"
+            android:text="bluetooth connect" />
     </LinearLayout>
     <LinearLayout
         android:layout_width="match_parent"

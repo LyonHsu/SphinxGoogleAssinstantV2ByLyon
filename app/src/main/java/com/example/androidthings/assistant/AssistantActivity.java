@@ -18,6 +18,7 @@ package com.example.androidthings.assistant;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -30,6 +31,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.speech.tts.TextToSpeech;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
@@ -50,6 +52,7 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import com.example.androidthings.assistant.BlueTooth.BluetoothTool;
 import com.example.androidthings.assistant.DialogFlow.DialogFlowInit;
 import com.example.androidthings.assistant.EmbeddedAssistant.ConversationCallback;
 import com.example.androidthings.assistant.EmbeddedAssistant.RequestCallback;
@@ -81,6 +84,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -155,6 +159,12 @@ public class AssistantActivity extends AppCompatActivity implements Button.OnBut
     YoutubeFragment youtubeFragment;
 
     boolean isSpecialRequest = false;
+
+    BluetoothTool bluetoothTool;
+    final int OPENBLUETOOTH = 0;
+    final int REQUEST_ENABLE_BT = 100;
+    private static final int REQUEST_CODE = 2; // 请求码
+    public static int OVERLAY_PERMISSION_REQ_CODE = 1234;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -581,6 +591,8 @@ public class AssistantActivity extends AppCompatActivity implements Button.OnBut
             // TODO打開一盞燈！
             LEDShining();
         }
+
+        BlueToothInit();
     }
 
     @Override
@@ -588,6 +600,23 @@ public class AssistantActivity extends AppCompatActivity implements Button.OnBut
         super.onResume();
         if(netWork!=null)
             netWork.onResume();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        Log.d(TAG, "onActivityResult requestCode:" + requestCode + " resultCode:" + resultCode);
+        if (requestCode == REQUEST_ENABLE_BT) {
+            Log.d(TAG, "BluetoothTool Enable requestCode:" + requestCode);
+        }
+        // 拒绝时, 关闭页面, 缺少主要权限, 无法运行
+        if (requestCode == OVERLAY_PERMISSION_REQ_CODE) {
+            if (!Settings.canDrawOverlays(this)) {
+                // SYSTEM_ALERT_WINDOW permission not granted...
+                Toast.makeText(this, "Permission Denieddd by user.Please Check it in Settings", Toast.LENGTH_SHORT).show();
+                finish();
+            }
+        }
     }
 
     private AudioDeviceInfo findAudioDevice(int deviceFlag, int deviceType) {
@@ -660,6 +689,8 @@ public class AssistantActivity extends AppCompatActivity implements Button.OnBut
             textToSpeech.shutdown();
             textToSpeech=null;
         }
+
+        bluetoothTool.onDestroy();
     }
 
     //===========Sphinx 喚醒詞=======================================================================
@@ -807,7 +838,55 @@ public class AssistantActivity extends AppCompatActivity implements Button.OnBut
                 return false;
             }
         });
-
     }
+
+    public void BlueToothInit(){
+        bluetoothTool = new BluetoothTool(this) {
+            @Override
+            public void getBluetoothDeviceName(HashMap<String, String> bluetoothDeviceName, BluetoothDevice device) {
+
+                int i = 0;
+                for (Map.Entry<String, String> entry : bluetoothDeviceName.entrySet()) {
+                    Log.d(TAG,""+"[" + i + "]:" + entry.getValue() + ", " + entry.getKey());
+                    i++;
+                }
+            }
+            @Override
+            public void openBluetoothTime(int time) {
+                Log.e(TAG, "openBluetoothTime:" + time);
+                Message message = new Message();
+                message.obj = time;
+                message.what = OPENBLUETOOTH;
+                handler.sendMessage(message);
+
+            }
+
+            @Override
+            public void startBT(Intent intent) {
+                Log.d(TAG, "startBT intent:" + intent.getAction());
+                startActivityForResult(intent, REQUEST_ENABLE_BT);
+            }
+
+            @Override
+            public void reSearchOldBluetoothdevice() {
+                super.reSearchOldBluetoothdevice();
+            }
+        };
+        String bluetoothType = bluetoothTool.getBlueToothType(bluetoothTool.getBluetoothClass());
+        String blueDate = "bluetooth Name:" + bluetoothTool.getBluetoothName("Lyon Smart Box Pi3_" + Build.MODEL) + ",   Mac:" + bluetoothTool.getBluetoothMac();
+        bluetoothTool.findBuletoothDevice();
+        bluetoothTool.openBlueTooth();
+    }
+
+    private Handler handler = new Handler() {
+        @Override
+        public void handleMessage(Message message) {
+            switch (message.what) {
+                case OPENBLUETOOTH:
+                    Log.d(TAG, "handler openBluetoothTime:" + message.obj + "s");
+                    break;
+            }
+        }
+    };
 
 }

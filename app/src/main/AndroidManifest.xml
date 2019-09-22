@@ -36,7 +36,19 @@
     <!--Audio mode set-->
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
 
+    // 使用蓝牙设备的权限
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    // 管理蓝牙设备的权限
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="ndroid.permission.LOCATION_MAC_ADDRESS"/>
+    //进行蓝牙相关操作
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="com.google.android.things.permission.MANAGE_BLUETOOTH"/>
+
     <application
+        android:name=".AppController"
         android:label="@string/app_name">
 
         <activity android:name=".AssistantActivity"
@@ -68,5 +80,7 @@
             android:screenOrientation="landscape" />
 
         <activity android:name=".Youtube.YoutubePlayer"/>
+
+        <service android:name=".BlueTooth.BluetoothService" android:enabled="true"/>
     </application>
 </manifest>

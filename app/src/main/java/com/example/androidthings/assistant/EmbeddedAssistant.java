@@ -30,6 +30,7 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.View;
 
+import com.example.androidthings.assistant.Tool.Utils;
 import com.google.assistant.embedded.v1alpha2.AssistConfig;
 import com.google.assistant.embedded.v1alpha2.AssistRequest;
 import com.google.assistant.embedded.v1alpha2.AssistResponse;
@@ -54,6 +55,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -281,16 +283,20 @@ public class EmbeddedAssistant {
                             mConversationCallback.onResponseStarted();
                         }
                     });
-                    for (ByteBuffer audioData : mAssistantResponses) {
-                        final ByteBuffer buf = audioData;
-                        mConversationHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                mConversationCallback.onAudioSample(buf);
-                            }
-                        });
-                        audioTrack.write(buf, buf.remaining(),
-                                AudioTrack.WRITE_BLOCKING);
+                    try {
+                        for (ByteBuffer audioData : mAssistantResponses) {
+                            final ByteBuffer buf = audioData;
+                            mConversationHandler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mConversationCallback.onAudioSample(buf);
+                                }
+                            });
+                            audioTrack.write(buf, buf.remaining(),
+                                    AudioTrack.WRITE_BLOCKING);
+                        }
+                    }catch (ConcurrentModificationException e){
+                        Log.e(TAG,""+ Utils.FormatStackTrace(e));
                     }
                     mAssistantResponses.clear();
                     audioTrack.stop();

@@ -477,7 +477,7 @@ public abstract class BluetoothTool {
             };
 
     private void addBluetoothDevice(BluetoothDevice device){
-        Log.d(TAG,"BluetoothDevice 获取查找到的蓝牙设备 :("+getBlueToothType(device.getBluetoothClass().getMajorDeviceClass())+")"+device.getName()+":"+device.getAddress()+" mScanning:"+mScanning+ " type:0x"+device.getBluetoothClass().getMajorDeviceClass());
+//        Log.d(TAG,"BluetoothDevice 获取查找到的蓝牙设备 :("+getBlueToothType(device.getBluetoothClass().getMajorDeviceClass())+")"+device.getName()+":"+device.getAddress()+" mScanning:"+mScanning+ " type:0x"+device.getBluetoothClass().getMajorDeviceClass());
         int classint = device.getBluetoothClass().getMajorDeviceClass();
         String type=getBlueToothType(classint);
         //排除未分類(UNCATEGORIZED)或是雜項(MISC) 或是其他的(Other) 藍牙設備

@@ -96,12 +96,14 @@ public class DialogFlowInit {
                 try {
                  jsonObject = new JSONObject(""+speech+"");
                 } catch (JSONException e) {
-                    e.printStackTrace(); }
+                }
                 if(!speech.contains("{")){
                     try {
                     jsonObject = new JSONObject("{"+speech+"}");
                     } catch (JSONException e) {
-                        e.printStackTrace(); }
+//                        DialogFlowAction(assistResponse, jsonObject);
+//                        return;
+                    }
                 }else{
                     jsonObject = new JSONObject(""+speech+"");
                 }

@@ -335,9 +335,13 @@ public class EmbeddedAssistant {
                     mRequestCallback.onAudioRecording();
                 }
             });
-            mAssistantRequestObserver.onNext(AssistRequest.newBuilder()
-                    .setAudioIn(ByteString.copyFrom(audioData))
-                    .build());
+            try {
+                mAssistantRequestObserver.onNext(AssistRequest.newBuilder()
+                        .setAudioIn(ByteString.copyFrom(audioData))
+                        .build());
+            }catch (Exception e){
+                Log.e(TAG,"mStreamAssistantRequest :"+e);
+            }
             mAssistantHandler.post(mStreamAssistantRequest);
         }
     };

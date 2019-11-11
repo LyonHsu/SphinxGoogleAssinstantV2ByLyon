@@ -49,7 +49,7 @@ public class BluetoothService extends Service {
     private AcceptThread mSecureAcceptThread;
     private AcceptThread mInsecureAcceptThread;
     private ConnectThread mConnectThread;
-    private ConnectedThread mConnectedThread;
+    private ReadWriteThread mReadWriteThread;
     private int mState;
     private int mNewState;
 
@@ -105,9 +105,9 @@ public class BluetoothService extends Service {
         }
 
         // Cancel any thread currently running a connection
-        if (mConnectedThread != null) {
-            mConnectedThread.cancel();
-            mConnectedThread = null;
+        if (mReadWriteThread != null) {
+            mReadWriteThread.cancel();
+            mReadWriteThread = null;
         }
 
         // Start the thread to listen on a BluetoothServerSocket
@@ -141,9 +141,9 @@ public class BluetoothService extends Service {
         }
 
         // Cancel any thread currently running a connection
-        if (mConnectedThread != null) {
-            mConnectedThread.cancel();
-            mConnectedThread = null;
+        if (mReadWriteThread != null) {
+            mReadWriteThread.cancel();
+            mReadWriteThread = null;
         }
 
         // Start the thread to connect with the given device
@@ -154,7 +154,7 @@ public class BluetoothService extends Service {
     }
 
     /**
-     * Start the ConnectedThread to begin managing a Bluetooth connection
+     * Start the ReadWriteThread to begin managing a Bluetooth connection
      *
      * @param socket The BluetoothSocket on which the connection was made
      * @param device The BluetoothDevice that has been connected
@@ -170,9 +170,9 @@ public class BluetoothService extends Service {
         }
 
         // Cancel any thread currently running a connection
-        if (mConnectedThread != null) {
-            mConnectedThread.cancel();
-            mConnectedThread = null;
+        if (mReadWriteThread != null) {
+            mReadWriteThread.cancel();
+            mReadWriteThread = null;
         }
 
         // Cancel the accept thread because we only want to connect to one device
@@ -186,8 +186,8 @@ public class BluetoothService extends Service {
         }
 
         // Start the thread to manage the connection and perform transmissions
-        mConnectedThread = new ConnectedThread(socket, socketType);
-        mConnectedThread.start();
+        mReadWriteThread = new ReadWriteThread(socket, socketType);
+        mReadWriteThread.start();
 
         // Send the name of the connected device back to the UI Activity
         Message msg = mHandler.obtainMessage(MESSAGE_DEVICE_NAME);
@@ -210,9 +210,9 @@ public class BluetoothService extends Service {
             mConnectThread = null;
         }
 
-        if (mConnectedThread != null) {
-            mConnectedThread.cancel();
-            mConnectedThread = null;
+        if (mReadWriteThread != null) {
+            mReadWriteThread.cancel();
+            mReadWriteThread = null;
         }
 
         if (mSecureAcceptThread != null) {
@@ -230,18 +230,19 @@ public class BluetoothService extends Service {
     }
 
     /**
-     * Write to the ConnectedThread in an unsynchronized manner
+     * Write to the ReadWriteThread in an unsynchronized manner
      *
      * @param out The bytes to write
-     * @see ConnectedThread#write(byte[])
+     * @see ReadWriteThread#write(byte[])
      */
     public void write(byte[] out) {
         // Create temporary object
-        ConnectedThread r;
-        // Synchronize a copy of the ConnectedThread
+        Log.d(TAG,"write:"+out.toString());
+        ReadWriteThread r;
+        // Synchronize a copy of the ReadWriteThread
         synchronized (this) {
             if (mState != STATE_CONNECTED) return;
-            r = mConnectedThread;
+            r = mReadWriteThread;
         }
         // Perform the write unsynchronized
         r.write(out);
@@ -464,13 +465,13 @@ public class BluetoothService extends Service {
      * This thread runs during a connection with a remote device.
      * It handles all incoming and outgoing transmissions.
      */
-    private class ConnectedThread extends Thread {
+    private class ReadWriteThread extends Thread {
         private final BluetoothSocket mmSocket;
         private final InputStream mmInStream;
         private final OutputStream mmOutStream;
 
-        public ConnectedThread(BluetoothSocket socket, String socketType) {
-            Log.d(TAG, "create ConnectedThread: " + socketType);
+        public ReadWriteThread(BluetoothSocket socket, String socketType) {
+            Log.d(TAG, "create ReadWriteThread: " + socketType);
             mmSocket = socket;
             InputStream tmpIn = null;
             OutputStream tmpOut = null;
@@ -489,7 +490,7 @@ public class BluetoothService extends Service {
         }
 
         public void run() {
-            Log.i(TAG, "readMessage BEGIN mConnectedThread");
+            Log.i(TAG, "readMessage BEGIN mReadWriteThread");
             byte[] buffer = new byte[1024];
             int bytes;
 
@@ -520,8 +521,8 @@ public class BluetoothService extends Service {
                 mmOutStream.write(buffer);
 
                 // Share the sent message back to the UI Activity
-                mHandler.obtainMessage(MESSAGE_WRITE, -1, -1, buffer)
-                        .sendToTarget();
+//                mHandler.obtainMessage(MESSAGE_WRITE, -1, -1, buffer)
+//                        .sendToTarget();
             } catch (IOException e) {
                 Log.e(TAG, "writeMessage Exception during write", e);
             }

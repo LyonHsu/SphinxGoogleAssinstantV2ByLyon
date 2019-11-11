@@ -206,29 +206,34 @@ public class AssistantActivity extends AppCompatActivity implements Button.OnBut
 
 
             //設定音量
-            int systemName = AudioManager.STREAM_SYSTEM;
-            AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
+            try {
+                int systemName = AudioManager.STREAM_SYSTEM;
+                AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
 
-            /**
-            *MODE_NORMAL : 普通模式，既不是鈴聲模式也不是通話模式
-             * MODE_RINGTONE : 鈴聲模式
-             * MODE_IN_CALL : 通話模式
-             * MODE_IN_COMMUNICATION : 通訊模式，包括音/視訊,VoIP通話.(3.0加入的，與通話模式類似)
-             */
+                /**
+                 *MODE_NORMAL : 普通模式，既不是鈴聲模式也不是通話模式
+                 * MODE_RINGTONE : 鈴聲模式
+                 * MODE_IN_CALL : 通話模式
+                 * MODE_IN_COMMUNICATION : 通訊模式，包括音/視訊,VoIP通話.(3.0加入的，與通話模式類似)
+                 */
 //            audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
-            audioManager.setSpeakerphoneOn(true);
+                audioManager.setSpeakerphoneOn(true);
 
 
-            int maVolume = audioManager.getStreamMaxVolume(systemName)/2;
-            audioManager.setStreamVolume(systemName,maVolume,AudioManager.FLAG_SHOW_UI );
-            systemName = AudioManager.STREAM_MUSIC;//STREAM_RING
-            maVolume = audioManager.getStreamMaxVolume(systemName);
-            audioManager.setStreamVolume(systemName,maVolume,AudioManager.FLAG_VIBRATE );
-            systemName = AudioManager.STREAM_RING;//STREAM_RING
-            maVolume = audioManager.getStreamMaxVolume(systemName);
-            audioManager.setStreamVolume(systemName,maVolume,AudioManager.FLAG_VIBRATE );
-            ToastUtile.showText(context,"設定音量為："+maVolume);
-            Log.e(TAG,"設定音量為："+maVolume);
+                int maVolume = audioManager.getStreamMaxVolume(systemName) / 2;
+                audioManager.setStreamVolume(systemName, maVolume, AudioManager.FLAG_SHOW_UI);
+                systemName = AudioManager.STREAM_MUSIC;//STREAM_RING
+                maVolume = audioManager.getStreamMaxVolume(systemName);
+                audioManager.setStreamVolume(systemName, maVolume, AudioManager.FLAG_VIBRATE);
+                systemName = AudioManager.STREAM_RING;//STREAM_RING
+                maVolume = audioManager.getStreamMaxVolume(systemName);
+                audioManager.setStreamVolume(systemName, maVolume, AudioManager.FLAG_VIBRATE);
+                ToastUtile.showText(context, "設定音量為：" + maVolume);
+                Log.e(TAG, "設定音量為：" + maVolume);
+            }catch (Exception e){
+                Log.e(TAG,Utils.FormatStackTrace(e));
+            }
+
 
             setTurnScreenOn(true);
 
@@ -718,8 +723,8 @@ public class AssistantActivity extends AppCompatActivity implements Button.OnBut
 
         ToastUtile.showText(this,"是的");
 
-
-        mEmbeddedAssistant.startConversation();
+        if(mEmbeddedAssistant!=null)
+            mEmbeddedAssistant.startConversation();
         if (mLed != null) {
             try {
                 mLed.setValue(true);

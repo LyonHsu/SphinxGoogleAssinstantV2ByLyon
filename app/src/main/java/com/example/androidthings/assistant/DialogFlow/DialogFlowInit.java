@@ -2,8 +2,8 @@ package com.example.androidthings.assistant.DialogFlow;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import android.util.Log;
 
+import com.example.androidthings.assistant.Tool.Log;
 import com.google.assistant.embedded.v1alpha2.AssistResponse;
 
 import org.json.JSONException;

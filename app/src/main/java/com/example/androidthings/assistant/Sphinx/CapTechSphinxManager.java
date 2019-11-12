@@ -2,7 +2,8 @@ package com.example.androidthings.assistant.Sphinx;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import android.util.Log;
+
+import com.example.androidthings.assistant.Tool.Log;
 
 import java.io.File;
 import java.io.IOException;

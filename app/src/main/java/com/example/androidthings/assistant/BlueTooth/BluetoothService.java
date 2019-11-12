@@ -13,7 +13,8 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.support.annotation.Nullable;
-import android.util.Log;
+
+import com.example.androidthings.assistant.Tool.Log;
 
 import java.io.IOException;
 import java.io.InputStream;

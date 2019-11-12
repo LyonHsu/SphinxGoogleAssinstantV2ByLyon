@@ -20,7 +20,8 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
 import android.content.Intent;
-import android.util.Log;
+
+import com.example.androidthings.assistant.Tool.Log;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -144,7 +145,7 @@ public final class A2dpSinkHelper {
             return false;
         } catch (InvocationTargetException | IllegalAccessException e) {
             Log.w(TAG, "Could not execute method 'disconnect' in profile " +
-                    profile.getClass().getName() + ", ignoring request.", e);
+                    profile.getClass().getName() + ", ignoring request.:"+ e);
             return false;
         }
     }

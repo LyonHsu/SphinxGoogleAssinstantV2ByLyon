@@ -7,10 +7,10 @@ import android.media.AudioRecord;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 
 import com.example.androidthings.assistant.AssistantActivity;
 import com.example.androidthings.assistant.BoardDefaults;
+import com.example.androidthings.assistant.Tool.Log;
 
 import java.io.File;
 import java.io.IOException;

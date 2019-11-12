@@ -27,9 +27,9 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.annotation.IntDef;
 import android.support.annotation.Nullable;
-import android.util.Log;
 import android.view.View;
 
+import com.example.androidthings.assistant.Tool.Log;
 import com.example.androidthings.assistant.Tool.Utils;
 import com.google.assistant.embedded.v1alpha2.AssistConfig;
 import com.google.assistant.embedded.v1alpha2.AssistRequest;

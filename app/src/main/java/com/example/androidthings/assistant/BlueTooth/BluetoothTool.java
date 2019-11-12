@@ -20,7 +20,6 @@ import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Toast;
@@ -28,6 +27,7 @@ import android.widget.Toast;
 import com.example.androidthings.assistant.AppController;
 import com.example.androidthings.assistant.AssistantActivity;
 import com.example.androidthings.assistant.BlueTooth.Device.GetMacAddress;
+import com.example.androidthings.assistant.Tool.Log;
 import com.example.androidthings.assistant.Tool.ToastUtile;
 import com.example.androidthings.assistant.Tool.Utils;
 import com.google.android.things.bluetooth.BluetoothClassFactory;
@@ -401,15 +401,13 @@ public abstract class BluetoothTool {
                             WifiInfo wifiInf = wifiMan.getConnectionInfo();
                             int ipAddress = wifiInf.getIpAddress();
                             ip= String.format("%d.%d.%d.%d", (ipAddress & 0xff),(ipAddress >> 8 & 0xff),(ipAddress >> 16 & 0xff),(ipAddress >> 24 & 0xff));
-
                             String IP=""+ip;
+                            String ssID = wifiInf.getSSID();
                             JSONObject jsonObject = new JSONObject();
                             try {
                                 jsonObject.put("IP", IP);
-                                String jsonIP = jsonObject.toString();
-                                Log.d(TAG,"bluetooth chatroom write: "+jsonIP);
-                                byte[] writeBuf = (byte[]) jsonIP.getBytes();
-                                mService.write(writeBuf);
+                                jsonObject.put("SSID", ssID);
+                                bluetoothWrite(jsonObject);
                             }catch (JSONException e){
                                 Log.e(TAG,"");
                             }
@@ -431,7 +429,6 @@ public abstract class BluetoothTool {
                     // construct a string from the buffer
                     String writeMessage = new String(writeBuf);
                     ToastUtile.showText(context,"Me: "+writeMessage);
-//                    mService.write(writeBuf);
                     Log.d(TAG,"BlueTooth chatroom writeMessage:"+writeMessage);
                     break;
                 case BluetoothService.MESSAGE_READ:
@@ -572,6 +569,15 @@ public abstract class BluetoothTool {
 
     public void setSearchBluetoothdevice(SearchOldBluetoothdevice searchOldBluetoothdevice){
         this.searchOldBluetoothdevice=searchOldBluetoothdevice;
+    }
+
+    public void bluetoothWrite(JSONObject jsonObject){
+        if(mService!=null){
+            String jsonS = jsonObject.toString();
+            Log.d(TAG,"bluetooth chatroom write: "+jsonS);
+            byte[] writeBuf = (byte[]) jsonS.getBytes();
+            mService.write(writeBuf);
+        }
     }
 
 

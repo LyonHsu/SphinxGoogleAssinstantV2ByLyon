@@ -9,10 +9,10 @@ import android.content.res.Configuration;
 import android.os.Handler;
 import android.os.Message;
 import android.speech.tts.TextToSpeech;
-import android.util.Log;
 
 import com.example.androidthings.assistant.BlueTooth.BluetoothTool;
 import com.example.androidthings.assistant.TextToSpeech.LyonTextToSpeech;
+import com.example.androidthings.assistant.Tool.Log;
 
 import java.util.HashMap;
 import java.util.Locale;
@@ -67,10 +67,10 @@ public class AppController extends Application {
         boolean isPiDevice = true;
         UiModeManager uiModeManager = (UiModeManager) mContext.getSystemService(UI_MODE_SERVICE);
         if (uiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION) {
-            android.util.Log.d(TAG, "checkTVDevice Running on a TV Device");
+            Log.d(TAG, "checkTVDevice Running on a TV Device");
             isPiDevice = true;
         } else {
-            android.util.Log.d(TAG, "checkTVDevice Running on a non-TV Device");
+            Log.d(TAG, "checkTVDevice Running on a non-TV Device");
             isPiDevice = false;
         }
         return isPiDevice;

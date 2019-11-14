@@ -20,10 +20,14 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.example.androidthings.assistant.AppController;
 import com.example.androidthings.assistant.BlueTooth.A2dpSinkHelper;
 import com.example.androidthings.assistant.NetWork.WifiSetting.WifiMenu;
 import com.example.androidthings.assistant.R;
 import com.example.androidthings.assistant.Tool.Log;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import static android.net.wifi.WifiManager.EXTRA_SUPPLICANT_ERROR;
 import static com.example.androidthings.assistant.BlueTooth.A2dpSinkHelper.ACTION_CONNECTION_STATE_CHANGED;
@@ -151,6 +155,15 @@ public class NetWork extends RelativeLayout {
         Log.e(TAG, "20190610 ***** IP="+ ip);
         String theSpeech="已經連結到"+wifiInf.getSSID()+",Ip="+ip.replace(".","點");
         Log.e(TAG, "20190610***** theSpeechIP="+ theSpeech);
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("IP", ip);
+            jsonObject.put("SSID", wifiInf.getSSID());
+            AppController.getInstance().getBluetoothTool().bluetoothWrite(jsonObject);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
         return theSpeech;
     }
 

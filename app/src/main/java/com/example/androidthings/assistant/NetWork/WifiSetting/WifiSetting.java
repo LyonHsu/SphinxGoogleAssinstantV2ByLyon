@@ -132,9 +132,26 @@ public class WifiSetting {
     public boolean addNetwork(WifiConfiguration wcg) { // 添加一个网络配置并连接
         int wcgID = wifiManager.addNetwork(wcg);
         boolean b = wifiManager.enableNetwork(wcgID, true);
+        System.out.println("addNetwork--" + wcg.SSID);
+        if(!b) {
+            connectNetWork(wcg.SSID);
+        }
         System.out.println("addNetwork--" + wcgID);
         System.out.println("enableNetwork--" + b);
         return b;
+    }
+
+    public void connectNetWork(String networkSSID){
+        List<WifiConfiguration> list = wifiManager.getConfiguredNetworks();
+        for( WifiConfiguration i : list ) {
+            if(i.SSID != null && i.SSID.equals("\"" + networkSSID + "\"")) {
+                wifiManager.disconnect();
+                wifiManager.enableNetwork(i.networkId, true);
+                wifiManager.reconnect();
+
+                break;
+            }
+        }
     }
 
     public static WifiConfiguration createWifiConfiguration(String ssid, String password, WifiCipherType type) {

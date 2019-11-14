@@ -46,6 +46,8 @@ import com.google.assistant.embedded.v1alpha2.ScreenOutConfig;
 import com.google.assistant.embedded.v1alpha2.SpeechRecognitionResult;
 import com.google.auth.oauth2.UserCredentials;
 import com.google.protobuf.ByteString;
+
+import ai.api.model.ResponseMessage;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.auth.MoreCallCredentials;
@@ -342,11 +344,12 @@ public class EmbeddedAssistant {
                 }
             });
             try {
-                mAssistantRequestObserver.onNext(AssistRequest.newBuilder()
+                AssistRequest v= AssistRequest.newBuilder()
                         .setAudioIn(ByteString.copyFrom(audioData))
-                        .build());
+                        .build();
+                mAssistantRequestObserver.onNext((AssistRequest) v);
             }catch (Exception e){
-                Log.e(TAG,"mStreamAssistantRequest :"+e);
+                Log.e(TAG,"mStreamAssistantRequest :"+Utils.FormatStackTrace(e));
             }
             mAssistantHandler.post(mStreamAssistantRequest);
         }

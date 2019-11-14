@@ -16,7 +16,6 @@ import android.os.Message;
 import android.support.annotation.RequiresApi;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -30,6 +29,7 @@ import android.widget.Toast;
 import com.example.androidthings.assistant.NetWork.tool.Alert;
 import com.example.androidthings.assistant.NetWork.tool.Permission;
 import com.example.androidthings.assistant.R;
+import com.example.androidthings.assistant.Tool.Log;
 import com.google.protobuf.Internal;
 
 import java.util.ArrayList;
@@ -155,11 +155,13 @@ public class WifiMenu extends Activity {
                 case GETIP:
                     ipAddressShow = (TextView) findViewById(R.id.ipAddressShow);
                     ipAddressShow.setText(getLocalIpAddress(context));
+                    finish();
                     break;
                 case SHOW_IP_ADDRESS:
                     if (wifiSetting.addNetwork(WifiSetting.createWifiConfiguration(nameEdit.getText().toString(), passwordEdit.getText().toString(), wifiSetting.selectWifiCipherType(wifiSecuritytype.getText().toString())))) {
                         ipAddressShow = (TextView) findViewById(R.id.ipAddressShow);
                         ipAddressShow.setText(getLocalIpAddress(getApplicationContext()));
+                        finish();
                     } else {
                         ipAddressShow = (TextView) findViewById(R.id.ipAddressShow);
                         ipAddressShow.setText("no connect wifi!");

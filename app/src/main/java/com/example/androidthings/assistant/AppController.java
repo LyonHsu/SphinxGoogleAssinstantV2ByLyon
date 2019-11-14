@@ -1,16 +1,18 @@
 package com.example.androidthings.assistant;
 
 import android.app.Application;
+import android.app.UiModeManager;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Handler;
 import android.os.Message;
 import android.speech.tts.TextToSpeech;
-import android.util.Log;
 
 import com.example.androidthings.assistant.BlueTooth.BluetoothTool;
 import com.example.androidthings.assistant.TextToSpeech.LyonTextToSpeech;
+import com.example.androidthings.assistant.Tool.Log;
 
 import java.util.HashMap;
 import java.util.Locale;
@@ -18,7 +20,7 @@ import java.util.Map;
 
 public class AppController extends Application {
 
-    String TAG = AppController.class.getName();
+    static String TAG = AppController.class.getName();
     private static AppController appController;
     private TextToSpeech mTtsEngine;
     private static final String UTTERANCE_ID =
@@ -59,6 +61,19 @@ public class AppController extends Application {
             mTtsEngine.speak(utterance, TextToSpeech.QUEUE_ADD, null, UTTERANCE_ID);
             LyonTextToSpeech.speak(context,mTtsEngine,utterance);
         }
+    }
+
+    public static boolean checkPiDevice(Context mContext){
+        boolean isPiDevice = true;
+        UiModeManager uiModeManager = (UiModeManager) mContext.getSystemService(UI_MODE_SERVICE);
+        if (uiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION) {
+            Log.d(TAG, "checkTVDevice Running on a TV Device");
+            isPiDevice = true;
+        } else {
+            Log.d(TAG, "checkTVDevice Running on a non-TV Device");
+            isPiDevice = false;
+        }
+        return isPiDevice;
     }
 
 

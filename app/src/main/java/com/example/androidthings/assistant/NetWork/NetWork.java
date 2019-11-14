@@ -1,22 +1,32 @@
 package com.example.androidthings.assistant.NetWork;
 
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.net.NetworkInfo;
+import android.net.wifi.SupplicantState;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.provider.Settings;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.example.androidthings.assistant.BlueTooth.A2dpSinkHelper;
 import com.example.androidthings.assistant.NetWork.WifiSetting.WifiMenu;
 import com.example.androidthings.assistant.R;
+import com.example.androidthings.assistant.Tool.Log;
+
+import static android.net.wifi.WifiManager.EXTRA_SUPPLICANT_ERROR;
+import static com.example.androidthings.assistant.BlueTooth.A2dpSinkHelper.ACTION_CONNECTION_STATE_CHANGED;
 
 /*
 adb shell am start -n  com.example.androidthings.assistant/.AssistantActivity
@@ -29,6 +39,14 @@ public class NetWork extends RelativeLayout {
     View view;
     ImageView netWorkIcon;
     TextView SSIDTxt,IPTxt,networkTxt;
+    OnWifiStatusListener onWifiStatusListener=null;
+    public static interface OnWifiStatusListener{
+        void wifiStatue(NetworkInfo.DetailedState status);
+    }
+
+    public void setOnWifiStatusListener(OnWifiStatusListener listener) {
+        this.onWifiStatusListener = listener;
+    }
 
 
     public void onResume(){
@@ -73,7 +91,36 @@ public class NetWork extends RelativeLayout {
 //                superOnClick();
 //            }
 //        });
+
+        // 註冊監聽並通過返回重新整理WiFiList
+        IntentFilter wifiFilter = new IntentFilter();
+        wifiFilter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
+        wifiFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
+        wifiFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
+        wifiFilter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
+        context.registerReceiver(wifiReceiver, wifiFilter);
     }
+    private BroadcastReceiver wifiReceiver = new BroadcastReceiver(){
+        public void onReceive(Context context, Intent intent) {
+            Log.i(TAG, "onReceive: intent action" + intent.getAction());
+            if (intent.getAction().equals(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)) {
+                //當掃描結果後，進行重新整理列表
+            } else if (intent.getAction().equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)) {
+                //wifi連線網路狀態變化
+                NetworkInfo.DetailedState state = ((NetworkInfo) intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO)).getDetailedState();
+                getLocalIpAddress(context);
+                if(onWifiStatusListener!=null)
+                    onWifiStatusListener.wifiStatue(state);
+            } else if (intent.getAction().equals(WifiManager.WIFI_STATE_CHANGED_ACTION)) {
+                //wifi狀態變化
+                int wifiState = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, WifiManager.WIFI_STATE_DISABLED);
+            } else if (intent.getAction().equals(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION)) {
+                SupplicantState state = intent.getParcelableExtra(WifiManager.EXTRA_NEW_STATE);
+                int error = intent.getIntExtra(EXTRA_SUPPLICANT_ERROR, 0);
+
+            }
+        }
+    };
 
     public void superOnClick(){
         Log.e(TAG,"NetWork onClick!");
@@ -128,5 +175,6 @@ public class NetWork extends RelativeLayout {
             return -1;
         }
     }
+
 
 }

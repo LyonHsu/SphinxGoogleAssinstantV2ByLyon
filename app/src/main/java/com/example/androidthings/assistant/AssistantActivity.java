@@ -26,6 +26,9 @@ import android.content.SharedPreferences.Editor;
 import android.media.AudioAttributes;
 import android.media.AudioDeviceInfo;
 import android.media.AudioManager;
+import android.net.NetworkInfo;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -40,7 +43,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Base64;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.webkit.WebView;
@@ -61,6 +63,7 @@ import com.example.androidthings.assistant.NetWork.tool.Alert;
 import com.example.androidthings.assistant.NetWork.tool.Permission;
 import com.example.androidthings.assistant.Sphinx.CapTechSphinxManager;
 import com.example.androidthings.assistant.TextToSpeech.LyonTextToSpeech;
+import com.example.androidthings.assistant.Tool.Log;
 import com.example.androidthings.assistant.Tool.ToastUtile;
 import com.example.androidthings.assistant.Youtube.Item;
 import com.example.androidthings.assistant.Youtube.Play.YoutubeFragment;
@@ -193,7 +196,7 @@ public class AssistantActivity extends AppCompatActivity implements Button.OnBut
                         HashMap myHash = new HashMap<String, String>();
                         myHash.put(TextToSpeech.Engine.KEY_PARAM_STREAM,
                                 String.valueOf(AudioManager.MODE_NORMAL));
-                        textToSpeech.speak(openComplete, TextToSpeech.QUEUE_FLUSH, myHash);
+//                        textToSpeech.speak(openComplete, TextToSpeech.QUEUE_FLUSH, myHash);
                         Log.d(TAG, "getTextToSpeech speak result init:" + result);
 
 
@@ -206,29 +209,34 @@ public class AssistantActivity extends AppCompatActivity implements Button.OnBut
 
 
             //設定音量
-            int systemName = AudioManager.STREAM_SYSTEM;
-            AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
+            try {
+                int systemName = AudioManager.STREAM_SYSTEM;
+                AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
 
-            /**
-            *MODE_NORMAL : 普通模式，既不是鈴聲模式也不是通話模式
-             * MODE_RINGTONE : 鈴聲模式
-             * MODE_IN_CALL : 通話模式
-             * MODE_IN_COMMUNICATION : 通訊模式，包括音/視訊,VoIP通話.(3.0加入的，與通話模式類似)
-             */
+                /**
+                 *MODE_NORMAL : 普通模式，既不是鈴聲模式也不是通話模式
+                 * MODE_RINGTONE : 鈴聲模式
+                 * MODE_IN_CALL : 通話模式
+                 * MODE_IN_COMMUNICATION : 通訊模式，包括音/視訊,VoIP通話.(3.0加入的，與通話模式類似)
+                 */
 //            audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
-            audioManager.setSpeakerphoneOn(true);
+                audioManager.setSpeakerphoneOn(true);
 
 
-            int maVolume = audioManager.getStreamMaxVolume(systemName)/2;
-            audioManager.setStreamVolume(systemName,maVolume,AudioManager.FLAG_SHOW_UI );
-            systemName = AudioManager.STREAM_MUSIC;//STREAM_RING
-            maVolume = audioManager.getStreamMaxVolume(systemName);
-            audioManager.setStreamVolume(systemName,maVolume,AudioManager.FLAG_VIBRATE );
-            systemName = AudioManager.STREAM_RING;//STREAM_RING
-            maVolume = audioManager.getStreamMaxVolume(systemName);
-            audioManager.setStreamVolume(systemName,maVolume,AudioManager.FLAG_VIBRATE );
-            ToastUtile.showText(context,"設定音量為："+maVolume);
-            Log.e(TAG,"設定音量為："+maVolume);
+                int maVolume = audioManager.getStreamMaxVolume(systemName) / 2;
+                audioManager.setStreamVolume(systemName, maVolume, AudioManager.FLAG_SHOW_UI);
+                systemName = AudioManager.STREAM_MUSIC;//STREAM_RING
+                maVolume = audioManager.getStreamMaxVolume(systemName);
+                audioManager.setStreamVolume(systemName, maVolume, AudioManager.FLAG_VIBRATE);
+                systemName = AudioManager.STREAM_RING;//STREAM_RING
+                maVolume = audioManager.getStreamMaxVolume(systemName);
+                audioManager.setStreamVolume(systemName, maVolume, AudioManager.FLAG_VIBRATE);
+                ToastUtile.showText(context, "設定音量為：" + maVolume);
+                Log.e(TAG, "設定音量為：" + maVolume);
+            }catch (Exception e){
+                Log.e(TAG,Utils.FormatStackTrace(e));
+            }
+
 
             setTurnScreenOn(true);
 
@@ -268,6 +276,63 @@ public class AssistantActivity extends AppCompatActivity implements Button.OnBut
                     netWork.superOnClick();
                     LyonTextToSpeech.speak(context,textToSpeech,netWork.getLocalIpAddress(context));
 
+                }
+            });
+
+            netWork.setOnWifiStatusListener(new NetWork.OnWifiStatusListener() {
+                @Override
+                public void wifiStatue(NetworkInfo.DetailedState status) {
+                    Log.i(TAG, " onReceive: intent action wifiStatue:" + status);
+                    if(status.equals(NetworkInfo.DetailedState.CONNECTED)) {
+                        String ipp =  "no connect wifi!";
+                        String ip =ipp;
+                        WifiManager wifiMan = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+                        WifiInfo wifiInf = wifiMan.getConnectionInfo();
+                        int ipAddress = wifiInf.getIpAddress();
+                        ip= String.format("%d.%d.%d.%d", (ipAddress & 0xff),(ipAddress >> 8 & 0xff),(ipAddress >> 16 & 0xff),(ipAddress >> 24 & 0xff));
+                        String IP=""+ip;
+                        String ssID = wifiInf.getSSID();
+                        JSONObject jsonObject = new JSONObject();
+                        try {
+                            jsonObject.put("IP", IP);
+                            jsonObject.put("SSID", ssID);
+                            blueToothWrite(jsonObject);
+                        }catch (JSONException e){
+                            Log.e(TAG,"");
+                        }
+                    }else if(status.equals(NetworkInfo.DetailedState.SCANNING) ||
+                            status.equals(NetworkInfo.DetailedState.DISCONNECTING) ||
+                            status.equals(NetworkInfo.DetailedState.FAILED) ||
+                            status.equals(NetworkInfo.DetailedState.BLOCKED) ||
+                            status.equals(NetworkInfo.DetailedState.DISCONNECTED)
+                    ){
+                        JSONObject jsonObject = new JSONObject();
+                        try {
+                            jsonObject.put("IP", "DISCONNECTED");
+                            blueToothWrite(jsonObject);
+                        }catch (JSONException e){
+                            Log.e(TAG,"");
+                        }
+                    }else if(status.equals(NetworkInfo.DetailedState.CONNECTING) ||
+                            status.equals(NetworkInfo.DetailedState.AUTHENTICATING) ||
+                            status.equals(NetworkInfo.DetailedState.OBTAINING_IPADDR)
+                    ){
+                        JSONObject jsonObject = new JSONObject();
+                        try {
+                            jsonObject.put("IP", "CONNECTING");
+                            blueToothWrite(jsonObject);
+                        }catch (JSONException e){
+                            Log.e(TAG,"");
+                        }
+                    }else if(status.equals(NetworkInfo.DetailedState.SUSPENDED)){
+                        JSONObject jsonObject = new JSONObject();
+                        try {
+                            jsonObject.put("IP", "SUSPENDED");
+                            blueToothWrite(jsonObject);
+                        }catch (JSONException e){
+                            Log.e(TAG,"");
+                        }
+                    }
                 }
             });
 
@@ -350,7 +415,7 @@ public class AssistantActivity extends AppCompatActivity implements Button.OnBut
                     mLed.setActiveType(Gpio.ACTIVE_HIGH);
                 }
             } catch (Exception e) {
-                Log.e(TAG, "error configuring peripherals:", e);
+                Log.e(TAG, "error configuring peripherals:"+ e);
                 return;
             }
 
@@ -365,7 +430,7 @@ public class AssistantActivity extends AppCompatActivity implements Button.OnBut
                         EmbeddedAssistant.generateCredentials(this, R.raw.credentials);
                 progressDialog.setMessage("set Oauth credentials....");
             } catch (IOException | JSONException e) {
-                Log.e(TAG, "error getting user credentials", e);
+                Log.e(TAG, "error getting user credentials"+ e);
             }
             try {
 
@@ -411,7 +476,7 @@ public class AssistantActivity extends AppCompatActivity implements Button.OnBut
                                     try {
                                         mDac.setSdMode(Max98357A.SD_MODE_LEFT);
                                     } catch (IOException e) {
-                                        Log.e(TAG, "error enabling DAC", e);
+                                        Log.e(TAG, "error enabling DAC:"+ e);
                                     }
                                 }
                             }
@@ -423,7 +488,7 @@ public class AssistantActivity extends AppCompatActivity implements Button.OnBut
                                     try {
                                         mDac.setSdMode(Max98357A.SD_MODE_SHUTDOWN);
                                     } catch (IOException e) {
-                                        Log.e(TAG, "error disabling DAC", e);
+                                        Log.e(TAG, "error disabling DAC:"+ e);
                                     }
                                 }
                                 if (mLed != null) {
@@ -431,7 +496,7 @@ public class AssistantActivity extends AppCompatActivity implements Button.OnBut
                                         mLed.setValue(false);
                                         LEDShining = false;
                                     } catch (IOException e) {
-                                        Log.e(TAG, "cannot turn off LED", e);
+                                        Log.e(TAG, "cannot turn off LED:"+ e);
                                     }
                                 }
 
@@ -440,7 +505,7 @@ public class AssistantActivity extends AppCompatActivity implements Button.OnBut
 
                             @Override
                             public void onError(Throwable throwable) {
-                                Log.e(TAG, "assist error: " + throwable.getMessage(), throwable);
+                                Log.e(TAG, "assist error: " + throwable.getMessage()+" "+ throwable);
                             }
 
                             @Override
@@ -639,7 +704,7 @@ public class AssistantActivity extends AppCompatActivity implements Button.OnBut
                 Log.e(TAG, "mLed == on");
             }
         } catch (Exception e) {
-            Log.d(TAG, "error toggling LED:", e);
+            Log.d(TAG, "error toggling LED:"+ e);
         }
         if (pressed) {
             LyonTextToSpeech.speak(context,textToSpeech,AISay);
@@ -656,7 +721,7 @@ public class AssistantActivity extends AppCompatActivity implements Button.OnBut
             try {
                 mLed.close();
             } catch (IOException e) {
-                Log.w(TAG, "error closing LED", e);
+                Log.w(TAG, "error closing LED:"+ e);
             }
             mLed = null;
         }
@@ -664,7 +729,7 @@ public class AssistantActivity extends AppCompatActivity implements Button.OnBut
             try {
                 mButton.close();
             } catch (IOException e) {
-                Log.w(TAG, "error closing button", e);
+                Log.w(TAG, "error closing button:"+ e);
             }
             mButton = null;
         }
@@ -672,9 +737,9 @@ public class AssistantActivity extends AppCompatActivity implements Button.OnBut
             try {
                 mDac.close();
             } catch (IOException e) {
-                Log.w(TAG, "error closing voice hat trigger", e);
+                Log.w(TAG, "error closing voice hat trigger:"+ e);
             } catch (NullPointerException e){
-                Log.w(TAG, "error closing voice hat trigger", e);
+                Log.w(TAG, "error closing voice hat trigger:"+ e);
             }
             mDac = null;
         }
@@ -704,7 +769,7 @@ public class AssistantActivity extends AppCompatActivity implements Button.OnBut
 //        playDing(this);
         LEDShining=false;
         if(textToSpeech!=null) {
-            LyonTextToSpeech.speak(context, textToSpeech, openComplete);
+//            LyonTextToSpeech.speak(context, textToSpeech, openComplete);
             ToastUtile.showText(this, openComplete);
         }
         progressDialog.dismiss();
@@ -718,8 +783,8 @@ public class AssistantActivity extends AppCompatActivity implements Button.OnBut
 
         ToastUtile.showText(this,"是的");
 
-
-        mEmbeddedAssistant.startConversation();
+        if(mEmbeddedAssistant!=null)
+            mEmbeddedAssistant.startConversation();
         if (mLed != null) {
             try {
                 mLed.setValue(true);
@@ -899,5 +964,11 @@ public class AssistantActivity extends AppCompatActivity implements Button.OnBut
             }
         }
     };
+
+    public void blueToothWrite(JSONObject jsonObject){
+        if(bluetoothTool!=null){
+            bluetoothTool.bluetoothWrite(jsonObject);
+        }
+    }
 
 }

@@ -8,9 +8,9 @@ import android.media.AudioTrack;
 import android.os.Build;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.Voice;
-import android.util.Log;
 
 import com.example.androidthings.assistant.AssistantActivity;
+import com.example.androidthings.assistant.Tool.Log;
 import com.example.androidthings.assistant.Tool.ToastUtile;
 
 import java.util.ArrayList;

@@ -20,6 +20,7 @@ import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Toast;
@@ -27,7 +28,8 @@ import android.widget.Toast;
 import com.example.androidthings.assistant.AppController;
 import com.example.androidthings.assistant.AssistantActivity;
 import com.example.androidthings.assistant.BlueTooth.Device.GetMacAddress;
-import com.example.androidthings.assistant.Tool.Log;
+import com.example.androidthings.assistant.NetWork.WifiSetting.WifiMenu;
+import com.example.androidthings.assistant.NetWork.WifiSetting.WifiSetting;
 import com.example.androidthings.assistant.Tool.ToastUtile;
 import com.example.androidthings.assistant.Tool.Utils;
 import com.google.android.things.bluetooth.BluetoothClassFactory;
@@ -112,7 +114,7 @@ public abstract class BluetoothTool {
             mBluetoothAdapter = bluetoothManager.getAdapter();
             mBluetoothAdapter.getState();
             String mac = getBluetoothMac();
-            Log.d(TAG, "\n====================  Bluetooth mac : " + mac + " getState:"+mBluetoothAdapter.getState() );
+            android.util.Log.d(TAG, "\n====================  Bluetooth mac : " + mac + " getState:"+mBluetoothAdapter.getState() );
         }
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         isSupportBlue();
@@ -166,9 +168,9 @@ public abstract class BluetoothTool {
             if(AssistantActivity.USE_VOICEHAT_I2S_DAC) {
                 BluetoothConfigManager bluetoothConfigManager = BluetoothConfigManager.getInstance();
                 BluetoothClass bluetoothClass = bluetoothConfigManager.getBluetoothClass();
-                Log.e(TAG, "getBluetoothClass bluetoothClass:" + bluetoothClass.toString());
+//                Log.e(TAG, "getBluetoothClass bluetoothClass:" + bluetoothClass.toString());
                 type = bluetoothClass.getMajorDeviceClass();
-                Log.e(TAG, "getBluetoothClass type:" + type);
+//                Log.e(TAG, "getBluetoothClass type:" + type);
             }
             return type;
         }catch (Exception e){
@@ -186,16 +188,16 @@ public abstract class BluetoothTool {
     //判断是否支持蓝牙
     public boolean isSupportBlue(){
         if (!context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
-            Log.d(TAG,"设备不支持蓝牙");
+            android.util.Log.d(TAG,"设备不支持蓝牙");
             return true;
         }else {
-            Log.d(TAG,"设备支持蓝牙");
+            android.util.Log.d(TAG,"设备支持蓝牙");
             return false;
         }
     }
 
     public void findBuletoothDevice(){
-        Log.d(TAG,"findBuletoothDevice");
+        android.util.Log.d(TAG,"findBuletoothDevice");
 // 设置广播信息过滤
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(BluetoothDevice.ACTION_FOUND);
@@ -235,7 +237,7 @@ public abstract class BluetoothTool {
     public void reSearchOldBluetoothdevice(){};
 
     public void onDestroy() {
-        Log.e(TAG,"onDestroy()");
+        android.util.Log.e(TAG,"onDestroy()");
         context.unregisterReceiver(receiver);
         if (mBluetoothAdapter != null)
             mBluetoothAdapter.cancelDiscovery();
@@ -266,14 +268,14 @@ public abstract class BluetoothTool {
     };
 
     public void openBlueTooth(){
-        Log.d(TAG,"openBlueTooth");
+        android.util.Log.d(TAG,"openBlueTooth");
         if(isSearchNow)
             return;
         if(mBluetoothAdapter==null)
             return;
         time=openBluetoothTime;
         if (!mBluetoothAdapter.isEnabled() ) {
-            Log.d(TAG, "打开蓝牙");
+            android.util.Log.d(TAG, "打开蓝牙");
             AppController.getInstance().speak(context,"bluetooth on ");
             Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             // 设置蓝牙可见性，最多300秒
@@ -287,7 +289,7 @@ public abstract class BluetoothTool {
             openBluetoothTime(time);
             isSearchNow = true;
         }else{
-            Log.d(TAG, "蓝牙可被搜尋");
+            android.util.Log.d(TAG, "蓝牙可被搜尋");
             AppController.getInstance().speak(context,"bluetooth can search ");
             Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
             // 设置蓝牙可见性，最多300秒  目前設定請看openBluetoothTime參數
@@ -309,7 +311,7 @@ public abstract class BluetoothTool {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            Log.d(TAG,"BluetoothDevice onReceive "+action);
+            android.util.Log.d(TAG,"BluetoothDevice onReceive "+action);
             if (BluetoothDevice.ACTION_FOUND.equals(action) && isSearchNow) {
                 // 获取查找到的蓝牙设备
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
@@ -317,7 +319,7 @@ public abstract class BluetoothTool {
             }//状态改变时
             else if (BluetoothDevice.ACTION_BOND_STATE_CHANGED.equals(action)) {
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                Log.d(TAG,"the Bluetooth :"+device.getName()+" state is changed");
+                android.util.Log.d(TAG,"the Bluetooth :"+device.getName()+" state is changed");
                 Message msg = serviceHandler.obtainMessage();
                 msg.what=BluetoothService.MESSAGE_STATE_CHANGE;
                 switch (device.getBondState()) {
@@ -352,10 +354,10 @@ public abstract class BluetoothTool {
                         " to " + newState + " device " + device);
                 if (device != null) {
                     if (newState == A2dpSinkHelper.STATE_PLAYING) {
-                        Log.i(TAG, "Playing audio from device " + device.getAddress());
+                        android.util.Log.i(TAG, "Playing audio from device " + device.getAddress());
                         Toast.makeText(context,"播放狀態改變......播放", Toast.LENGTH_LONG).show();
                     } else if (newState == A2dpSinkHelper.STATE_NOT_PLAYING) {
-                        Log.i(TAG, "Stopped playing audio from " + device.getAddress());
+                        android.util.Log.i(TAG, "Stopped playing audio from " + device.getAddress());
                         Toast.makeText(context,"播放狀態改變......暫停", Toast.LENGTH_LONG).show();
                     }
                 }
@@ -363,7 +365,7 @@ public abstract class BluetoothTool {
                 int oldState = A2dpSinkHelper.getPreviousProfileState(intent);
                 int newState = A2dpSinkHelper.getCurrentProfileState(intent);
                 BluetoothDevice device = A2dpSinkHelper.getDevice(intent);
-                Log.d(TAG, "Bluetooth A2DP sink changing connection state from " + oldState +
+                android.util.Log.d(TAG, "Bluetooth A2DP sink changing connection state from " + oldState +
                         " to " + newState + " device " + device);
                 if (device != null) {
                     String deviceName = Objects.toString(device.getName(), "a device");
@@ -389,7 +391,7 @@ public abstract class BluetoothTool {
                 case BluetoothService.MESSAGE_STATE_CHANGE:
                     switch (msg.arg1) {
                         case BluetoothService.STATE_CONNECTED:
-                            Log.d(TAG,"BluetoothDevice BlueToothTestActivity"+ " 完成配对:"+mConnectedDeviceName);
+                            android.util.Log.d(TAG,"BluetoothDevice BlueToothTestActivity"+ " 完成配对:"+mConnectedDeviceName);
                             Toast.makeText(context,"完成配對 "+mConnectedDeviceName+"......", Toast.LENGTH_SHORT).show();
                             AppController.getInstance().speak(context," 設備完成配对");
                             if(searchOldBluetoothdevice!=null)
@@ -413,7 +415,7 @@ public abstract class BluetoothTool {
                             }
                             break;
                         case BluetoothService.STATE_CONNECTING:
-                            Log.d( TAG,"BluetoothDevice BlueToothTestActivity"+ "正在配对......");
+                            android.util.Log.d( TAG,"BluetoothDevice BlueToothTestActivity"+ "正在配对......");
                             Toast.makeText(context,"正在配对"+mConnectedDeviceName+"......", Toast.LENGTH_SHORT).show();
                             AppController.getInstance().speak(context," 設備連結中 ");
                             break;
@@ -429,7 +431,7 @@ public abstract class BluetoothTool {
                     // construct a string from the buffer
                     String writeMessage = new String(writeBuf);
                     ToastUtile.showText(context,"Me: "+writeMessage);
-                    Log.d(TAG,"BlueTooth chatroom writeMessage:"+writeMessage);
+                    android.util.Log.d(TAG,"BlueTooth chatroom writeMessage:"+writeMessage);
                     break;
                 case BluetoothService.MESSAGE_READ:
                     byte[] readBuf = (byte[]) msg.obj;
@@ -441,8 +443,9 @@ public abstract class BluetoothTool {
                     }catch (NullPointerException e){
 
                     }
+                    proccessMSG(readMessage);
                     ToastUtile.showText(context, deviceName+ ":  " +readMessage);
-                    Log.d(TAG,"BlueTooth chatroom readMessage:"+readMessage);
+                    android.util.Log.d(TAG,"BlueTooth chatroom readMessage:"+readMessage);
                     break;
                 case BluetoothService.MESSAGE_DEVICE_NAME:
                     // save the connected device's name
@@ -481,7 +484,7 @@ public abstract class BluetoothTool {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
                 for (ScanResult result: results){
                     BluetoothDevice device = result.getDevice();
-                    Log.i(TAG, "findBuletoothDevice scan succeed device ==  " +device);
+                    android.util.Log.i(TAG, "findBuletoothDevice scan succeed device ==  " +device);
                     addBluetoothDevice(device);
                 }
             }
@@ -490,7 +493,7 @@ public abstract class BluetoothTool {
         @Override
         public void onScanFailed(int errorCode) {
             super.onScanFailed(errorCode);
-            Log.i(TAG,"findBuletoothDevice scan fail");
+            android.util.Log.i(TAG,"findBuletoothDevice scan fail");
         }
     };
 
@@ -574,10 +577,27 @@ public abstract class BluetoothTool {
     public void bluetoothWrite(JSONObject jsonObject){
         if(mService!=null){
             String jsonS = jsonObject.toString();
-            Log.d(TAG,"bluetooth chatroom write: "+jsonS);
+//            android.util.Log.d(TAG,"bluetooth chatroom write: "+jsonS);
             byte[] writeBuf = (byte[]) jsonS.getBytes();
             mService.write(writeBuf);
         }
+    }
+
+    public void proccessMSG(String msg){
+        try {
+            JSONObject jsonObject = new JSONObject(msg);
+            if(jsonObject.has("SSID")){
+                String ssid = jsonObject.optString("SSID");
+                String passWD = jsonObject.optString("PASSWD");
+                String wifiType = jsonObject.optString("WifiTYPE");
+                WifiSetting wifiSetting = new WifiSetting();
+                wifiSetting.initWifi(context);
+                wifiSetting.addNetwork(WifiSetting.createWifiConfiguration(ssid, passWD, wifiSetting.selectWifiCipherType(wifiType)));
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
     }
 
 

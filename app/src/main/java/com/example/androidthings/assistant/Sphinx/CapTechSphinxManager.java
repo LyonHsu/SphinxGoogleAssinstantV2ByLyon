@@ -118,7 +118,7 @@ public class CapTechSphinxManager implements RecognitionListener {
     @Override
     public void onPartialResult(Hypothesis hypothesis) {
 
-        Log.d(TAG,"sphinx onPartialResult()");
+//        Log.d(TAG,"sphinx onPartialResult()");
         if (hypothesis == null) {
             return;
         }

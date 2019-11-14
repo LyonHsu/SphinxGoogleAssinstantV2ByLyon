@@ -26,11 +26,11 @@ public class AppController extends Application {
     private static final String UTTERANCE_ID =
             "com.example.androidthings.bluetooth.audio.UTTERANCE_ID";
 
-
-
+    AssistantActivity assistantActivity;
+    BluetoothTool bluetoothTool;
     @Override
     public void onCreate() {
-        Log.d(TAG, "onCreate");
+        android.util.Log.d(TAG, "onCreate");
         super.onCreate();
         appController = this;
         initTts();
@@ -74,6 +74,22 @@ public class AppController extends Application {
             isPiDevice = false;
         }
         return isPiDevice;
+    }
+
+    public void setAssistantActivity(AssistantActivity assistantActivity){
+        this.assistantActivity=assistantActivity;
+    }
+
+    public AssistantActivity getAssistantActivity( ){
+        return assistantActivity;
+    }
+
+    public BluetoothTool getBluetoothTool(){
+        return bluetoothTool;
+    }
+
+    public void setBluetoothTool(BluetoothTool bluetoothTool){
+         this.bluetoothTool=bluetoothTool;
     }
 
 

@@ -173,14 +173,16 @@ public class AssistantActivity extends AppCompatActivity implements Button.OnBut
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.i(TAG, "starting assistant demo");
+        android.util.Log.i(TAG, "starting assistant demo");
+
+        AppController.getInstance().setAssistantActivity(this);
         context = this;
         Permission permission = new Permission();
         if(!permission.checAudioRecordPermission(context)){
             Alert.showAlert(this, getString(R.string.wifititle), getString(R.string.wifioffmassage), "ok");
         }else {
             setContentView(R.layout.activity_main);
-
+            BlueToothInit();
             textToSpeech= new TextToSpeech(context, new TextToSpeech.OnInitListener() {
                 @Override
                 public void onInit(int status) {
@@ -658,7 +660,7 @@ public class AssistantActivity extends AppCompatActivity implements Button.OnBut
             LEDShining();
         }
 
-        BlueToothInit();
+
     }
 
     @Override
@@ -919,7 +921,7 @@ public class AssistantActivity extends AppCompatActivity implements Button.OnBut
             }
             @Override
             public void openBluetoothTime(int time) {
-                Log.e(TAG, "openBluetoothTime:" + time);
+                android.util.Log.e(TAG, "openBluetoothTime:" + time);
                 Message message = new Message();
                 message.obj = time;
                 message.what = OPENBLUETOOTH;
@@ -929,7 +931,7 @@ public class AssistantActivity extends AppCompatActivity implements Button.OnBut
 
             @Override
             public void startBT(Intent intent) {
-                Log.d(TAG, "startBT intent:" + intent.getAction());
+                android.util.Log.d(TAG, "startBT intent:" + intent.getAction());
                 startActivityForResult(intent, REQUEST_ENABLE_BT);
             }
 
@@ -940,6 +942,8 @@ public class AssistantActivity extends AppCompatActivity implements Button.OnBut
         };
         String bluetoothType = bluetoothTool.getBlueToothType(bluetoothTool.getBluetoothClass());
         String blueDate = "bluetooth Name:" + bluetoothTool.getBluetoothName("Lyon Smart Box Pi3_" + Build.MODEL) + ",   Mac:" + bluetoothTool.getBluetoothMac();
+        AppController.getInstance().setBluetoothTool(bluetoothTool);
+        android.util.Log.d(TAG,"bluetooth:"+blueDate+" type:"+bluetoothType);
         bluetoothTool.findBuletoothDevice();
         bluetoothTool.openBlueTooth();
 
@@ -952,6 +956,8 @@ public class AssistantActivity extends AppCompatActivity implements Button.OnBut
                 }
             }
         });
+
+
     }
 
     private Handler handler = new Handler() {

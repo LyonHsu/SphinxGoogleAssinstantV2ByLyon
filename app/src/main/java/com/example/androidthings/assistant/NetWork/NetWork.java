@@ -162,6 +162,8 @@ public class NetWork extends RelativeLayout {
             AppController.getInstance().getBluetoothTool().bluetoothWrite(jsonObject);
         } catch (JSONException e) {
             e.printStackTrace();
+        }catch (NullPointerException e){
+            e.printStackTrace();
         }
 
         return theSpeech;

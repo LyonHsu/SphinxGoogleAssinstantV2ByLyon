@@ -105,6 +105,10 @@ public class EmbeddedAssistant {
 
     private boolean isSpecialRequest = false;
 
+    public void setIsSpecialRequest(boolean is){
+        isSpecialRequest=is;
+    }
+
     // gRPC client and stream observers.
     private int mAudioOutSize; // Tracks the size of audio responses to determine when it ends.
     private EmbeddedAssistantGrpc.EmbeddedAssistantStub mAssistantService;
@@ -113,9 +117,9 @@ public class EmbeddedAssistant {
             new StreamObserver<AssistResponse>() {
                 @Override
                 public void onNext(final AssistResponse value) {
-                    if (DEBUG) {
-                        Log.d(TAG, "Received response: " + value.toString());
-                    }
+//                    if (DEBUG) {
+//                        Log.d(TAG, "Received response: " + value.toString());
+//                    }
                     if (value.getDeviceAction() != null &&
                         !value.getDeviceAction().getDeviceRequestJson().isEmpty()) {
                         // Iterate through JSON object
@@ -123,9 +127,9 @@ public class EmbeddedAssistant {
                             JSONObject deviceAction = new JSONObject(value.getDeviceAction()
                                 .getDeviceRequestJson());
                             JSONArray inputs = deviceAction.getJSONArray("inputs");
-                            if (DEBUG) {
-                                Log.d(TAG, "Received response inputs: " + inputs.toString());
-                            }
+//                            if (DEBUG) {
+//                                Log.d(TAG, "Received response inputs: " + inputs.toString());
+//                            }
                             for (int i = 0; i < inputs.length(); i++) {
                                 if (inputs.getJSONObject(i).getString("intent").equals(
                                     "action.devices.EXECUTE")) {
@@ -189,7 +193,7 @@ public class EmbeddedAssistant {
                             for (final SpeechRecognitionResult result : results) {
                                 String conversationText = result.getTranscript();
                                 float conversationStability =  result.getStability();
-                                if(conversationStability>0.8){
+                                if(conversationStability>0.9){
                                     Log.i(TAG, "Received response Conversation request text: " + conversationText +
                                             " stability: " + conversationStability);
 

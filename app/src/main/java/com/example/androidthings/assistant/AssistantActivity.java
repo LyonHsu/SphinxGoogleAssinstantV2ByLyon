@@ -626,7 +626,7 @@ public class AssistantActivity extends AppCompatActivity implements Button.OnBut
                             }
                         }
                     }
-
+                    mEmbeddedAssistant.setIsSpecialRequest(true);
                     if(isSpecialRequest){
                         Log.e(TAG,"====== stop Assistant Request ======");
                         mEmbeddedAssistant.stopConversation(isSpecialRequest);
@@ -785,7 +785,7 @@ public class AssistantActivity extends AppCompatActivity implements Button.OnBut
         LyonTextToSpeech.speak(context,textToSpeech,AISay);
 
         ToastUtile.showText(this,"是的");
-
+        mEmbeddedAssistant.setIsSpecialRequest(false);
         if(mEmbeddedAssistant!=null)
             mEmbeddedAssistant.startConversation();
         if (mLed != null) {

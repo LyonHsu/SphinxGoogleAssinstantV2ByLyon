@@ -771,7 +771,8 @@ public class AssistantActivity extends AppCompatActivity implements Button.OnBut
 //        playDing(this);
         LEDShining=false;
         if(textToSpeech!=null) {
-//            LyonTextToSpeech.speak(context, textToSpeech, openComplete);
+            LyonTextToSpeech.speak(context, textToSpeech, openComplete);
+            Log.e(TAG,openComplete);
             ToastUtile.showText(this, openComplete);
         }
         progressDialog.dismiss();

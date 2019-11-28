@@ -30,16 +30,16 @@ public class BluetoothService extends Service {
     public static final String DEVICE_NAME = "device_name";
     public static final String TOAST = "toast";
     // Debugging
-    private static final String TAG = "BluetoothService";
+    private final String TAG = "BluetoothService";
 
     // Name for the SDP record when creating server socket
-    private static final String NAME_SECURE = "BluetoothChatSecure";
-    private static final String NAME_INSECURE = "BluetoothChatInsecure";
+    private final String NAME_SECURE = "BluetoothChatSecure";
+    private final String NAME_INSECURE = "BluetoothChatInsecure";
 
     // Unique UUID for this application
-    private static final UUID MY_UUID_SECURE =
+    private final UUID MY_UUID_SECURE =
             UUID.fromString("fa87c0d0-afac-11de-8a39-0800200c9a66");
-    private static final UUID MY_UUID_INSECURE =
+    private final UUID MY_UUID_INSECURE =
             UUID.fromString("8ce255c0-200a-11e0-ac64-0800200c9a66");
 
     // Member fields

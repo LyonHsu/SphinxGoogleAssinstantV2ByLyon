@@ -64,6 +64,7 @@ import com.example.androidthings.assistant.NetWork.tool.Permission;
 import com.example.androidthings.assistant.Sphinx.CapTechSphinxManager;
 import com.example.androidthings.assistant.TextToSpeech.LyonTextToSpeech;
 import com.example.androidthings.assistant.Tool.Log;
+import com.example.androidthings.assistant.Tool.MainConstant;
 import com.example.androidthings.assistant.Tool.ToastUtile;
 import com.example.androidthings.assistant.Youtube.Item;
 import com.example.androidthings.assistant.Youtube.Play.YoutubeFragment;
@@ -94,7 +95,6 @@ import org.json.JSONObject;
 
 import com.example.androidthings.assistant.Tool.Utils;
 
-import static com.example.androidthings.assistant.Sphinx.CapTechSphinxManager.ACTIVATION_KEYPHRASE;
 
 
 public class AssistantActivity extends AppCompatActivity implements Button.OnButtonEventListener, CapTechSphinxManager.SphinxListener {
@@ -149,7 +149,7 @@ public class AssistantActivity extends AppCompatActivity implements Button.OnBut
     TextToSpeech textToSpeech;
     DialogFlowInit dialogFlowInit;
     String AISay="Yes";
-    String openComplete = "開機完畢 你可以使用 " + ACTIVATION_KEYPHRASE + " 來喚醒";
+    String openComplete = "開機完畢 你可以使用 " + MainConstant.ACTIVATION_KEYPHRASE + " 來喚醒";
 
 
     public final int NOTIFYCHANGE=2;

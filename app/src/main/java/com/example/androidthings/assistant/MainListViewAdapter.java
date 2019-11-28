@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import com.example.androidthings.assistant.Tool.MainConstant;
 import com.example.androidthings.assistant.Youtube.Item;
 
 import java.util.ArrayList;
@@ -45,10 +46,10 @@ public class MainListViewAdapter extends BaseAdapter {
     public View getView(int i, View view, ViewGroup viewGroup) {
         Item item = arrayList.get(i);
         switch (item.Type) {
-            case Item.SPEAKTOGOTYPE:
+            case MainConstant.SPEAKTOGOTYPE:
                 view = gotoSpeakToGoString(item.getString(), viewGroup);
                 break;
-            case Item.CUSTOMERTYPE:
+            case MainConstant.CUSTOMERTYPE:
                 view = gotoCustomerString(item.getString(), viewGroup);
                 break;
         }

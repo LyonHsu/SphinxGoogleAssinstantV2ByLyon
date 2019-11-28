@@ -37,8 +37,8 @@ import edu.cmu.pocketsphinx.Decoder;
 public class YoutubeFragment extends Fragment {
 
     String TAG=YoutubeFragment.class.getName();
-    private static String VIDEO_ID = "iCgiydq5F3U";
-    private static List<String> VIDEO_ID2 ;
+    private String VIDEO_ID = "iCgiydq5F3U";
+    private List<String> VIDEO_ID2 ;
     String videoUrl;
     YouTubePlayer.OnInitializedListener onInitializedListener;
     public  boolean isLoop = false;
@@ -47,8 +47,8 @@ public class YoutubeFragment extends Fragment {
     private YoutubeFragment.setOnNextShowListener setOnNextShowListener  =null;
     private YoutubeFragment.setPlayPauseShowListener setPlayPauseShowListener  =null;
     YouTubePlayerSupportFragment youTubePlayerFragment;
-    private static final int REQUEST_DIALOG = 101;
-    private static final int RECOVERY_DIALOG_REQUEST = 1;
+    private final int REQUEST_DIALOG = 101;
+    private final int RECOVERY_DIALOG_REQUEST = 1;
     @Override
     public void setArguments(Bundle bundle) {
         super.setArguments(bundle);

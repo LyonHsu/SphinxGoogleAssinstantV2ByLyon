@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.AsyncTask;
 
 import com.example.androidthings.assistant.Tool.Log;
+import com.example.androidthings.assistant.Tool.MainConstant;
 
 import java.io.File;
 import java.io.IOException;
@@ -45,8 +46,8 @@ public class CapTechSphinxManager implements RecognitionListener {
     //mah ???? M AA
     //moderate ???? M AA D ER AH T
     //fucker ???? F AH K ER
-    public static final String ACTIVATION_KEYPHRASE = "hey google"; //friday ???? F R AY D IY ??? F UW L AY D EY
-    private static final String WAKEUP_SEARCH = "wakeup";
+    //public static final String ACTIVATION_KEYPHRASE = "hey google"; //friday ???? F R AY D IY ??? F UW L AY D EY
+//    private static final String WAKEUP_SEARCH = "wakeup";
 
     private final SphinxListener mSphinxListener;
     Context context;
@@ -54,7 +55,7 @@ public class CapTechSphinxManager implements RecognitionListener {
     private LyonSpeechRecognizer mSpeechRecognizer;
 
     public String getHotKeyWord(){
-        return ACTIVATION_KEYPHRASE;
+        return MainConstant.ACTIVATION_KEYPHRASE;
     }
 
     public CapTechSphinxManager(Context context, SphinxListener mSphinxListener) {
@@ -75,7 +76,7 @@ public class CapTechSphinxManager implements RecognitionListener {
                     mSpeechRecognizer.addListener(CapTechSphinxManager.this);
 
                     // Custom recognizer
-                    mSpeechRecognizer.addKeyphraseSearch(WAKEUP_SEARCH, ACTIVATION_KEYPHRASE);
+                    mSpeechRecognizer.addKeyphraseSearch(MainConstant.WAKEUP_SEARCH, MainConstant.ACTIVATION_KEYPHRASE);
                     mSpeechRecognizer.addNgramSearch(ACTION_SEARCH, new File(assetsDir, "predefined.lm.bin"));
                 } catch (IOException e) {
                     return e;
@@ -107,7 +108,7 @@ public class CapTechSphinxManager implements RecognitionListener {
     @Override
     public void onEndOfSpeech() {
         Log.d(TAG,"sphinx onEndOfSpeech()");
-        if (!mSpeechRecognizer.getSearchName().equals(WAKEUP_SEARCH)) {
+        if (!mSpeechRecognizer.getSearchName().equals(MainConstant.WAKEUP_SEARCH)) {
             mSpeechRecognizer.stop();
         }
     }
@@ -125,7 +126,7 @@ public class CapTechSphinxManager implements RecognitionListener {
 
         String text = hypothesis.getHypstr();
         Log.e(TAG,"sphinx onPartialResult():"+text);
-        if (text.equals(ACTIVATION_KEYPHRASE)) {
+        if (text.equals(MainConstant.ACTIVATION_KEYPHRASE)) {
             mSpeechRecognizer.stop();
         }
     }
@@ -141,7 +142,7 @@ public class CapTechSphinxManager implements RecognitionListener {
 
         String text = hypothesis.getHypstr();
         Log.e(TAG,"sphinx onResult():"+text);
-        if (ACTIVATION_KEYPHRASE.equals(text)) {
+        if (MainConstant.ACTIVATION_KEYPHRASE.equals(text)) {
             mSphinxListener.onActivationPhraseDetected();
         }
     }
@@ -163,7 +164,7 @@ public class CapTechSphinxManager implements RecognitionListener {
      */
     public void startListeningToActivationPhrase() {
         Log.e(TAG,"sphinx start Listening To Activation Phrase():");
-        mSpeechRecognizer.startListening(WAKEUP_SEARCH);
+        mSpeechRecognizer.startListening(MainConstant.WAKEUP_SEARCH);
     }
 
 

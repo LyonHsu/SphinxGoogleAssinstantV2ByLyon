@@ -29,13 +29,13 @@ public class LyonSpeechRecognizer extends SpeechRecognizer {
     protected static final String TAG = SpeechRecognizer.class.getSimpleName();
     private final Decoder decoder;
     private final int sampleRate;
-    private static final float BUFFER_SIZE_SECONDS = 0.4F;
+    private final float BUFFER_SIZE_SECONDS = 0.4F;
     private int bufferSize;
     private final AudioRecord recorder;
     private Thread recognizerThread;
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private final Collection<RecognitionListener> listeners = new HashSet();
-    private static final boolean USE_VOICEHAT_I2S_DAC = Build.DEVICE.equals(BoardDefaults.DEVICE_RPI3);
+    private final boolean USE_VOICEHAT_I2S_DAC = Build.DEVICE.equals(BoardDefaults.DEVICE_RPI3);
     Context context;
     protected LyonSpeechRecognizer(Context context, Config config) throws IOException {
         super(config);

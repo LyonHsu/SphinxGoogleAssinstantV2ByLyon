@@ -19,9 +19,9 @@ import java.util.List;
 public class YoutubeAdapter extends RecyclerView.Adapter<YoutubeAdapter.MyViewHolder> {
     String TAG = YoutubeAdapter.class.getName();
     List<YoutubePoster> youtubePosters;
-    public static VideoClickListener mVideoClickListener;
+    public VideoClickListener mVideoClickListener;
 
-    public static class MyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public class MyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         // each data item is just a string in this case
         public TextView title;
         public TextView youtubeId;
@@ -36,8 +36,8 @@ public class YoutubeAdapter extends RecyclerView.Adapter<YoutubeAdapter.MyViewHo
 
         @Override
         public void onClick(View v) {
-            if(YoutubeAdapter.mVideoClickListener!=null)
-                YoutubeAdapter.mVideoClickListener.onItemClick(v, (int)v.getTag());
+            if(mVideoClickListener!=null)
+                mVideoClickListener.onItemClick(v, (int)v.getTag());
         }
     }
 
@@ -111,9 +111,6 @@ public class YoutubeAdapter extends RecyclerView.Adapter<YoutubeAdapter.MyViewHo
         return youtubePosters.size();
     }
 
-    public void setOnItemClickListener(VideoClickListener videoClickListener) {
-        YoutubeAdapter.mVideoClickListener = videoClickListener;
-    }
 
     public interface VideoClickListener {
         void onItemClick(View v, int postion);

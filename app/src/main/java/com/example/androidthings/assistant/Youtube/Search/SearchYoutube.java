@@ -23,12 +23,12 @@ import java.util.List;
 
 
 public abstract class SearchYoutube extends AsyncTask<Void, Void, List<SearchResult>> {
-    static String TAG =SearchYoutube.class.getName();
+    String TAG =SearchYoutube.class.getName();
 
-    private static final long NUMBER_OF_VIDEOS_RETURNED = 50;// [default: 5] [minimum: 0] [maximum: 50]
+    private final long NUMBER_OF_VIDEOS_RETURNED = 50;// [default: 5] [minimum: 0] [maximum: 50]
     private YouTube youtube = null;
 
-    static List<YoutubePoster> youtubePosters = new ArrayList<>();
+    List<YoutubePoster> youtubePosters = new ArrayList<>();
 
     String keyWord="ayasa";
     String nexttoken;

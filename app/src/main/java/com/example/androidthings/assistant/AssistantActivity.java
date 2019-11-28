@@ -615,6 +615,9 @@ public class AssistantActivity extends AppCompatActivity implements Button.OnBut
                                 isSpecialRequest = true;
                                 youtubeFragment.setPause();
                                 Toast.makeText(AssistantActivity.this, "播放暫停" , Toast.LENGTH_LONG).show();
+                                RelativeLayout youtubePlayerFragment = (RelativeLayout) findViewById(R.id.youtubePlayerFragment);
+                                youtubePlayerFragment.setVisibility(View.GONE);
+                                youtubeFragment=null;
                             }else if(action.equals("next_music")){
                                 isSpecialRequest = true;
                                 youtubeFragment.setNext();

@@ -99,11 +99,13 @@ public abstract class BluetoothTool {
         try {
             if(AssistantActivity.USE_VOICEHAT_I2S_DAC) {
                 bluetoothManager = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
-                BluetoothConfigManager manager = BluetoothConfigManager.getInstance();
-                BluetoothClass deviceClass = BluetoothClassFactory.build(
-                        BluetoothClass.Service.AUDIO,
-                        BluetoothClass.Device.AUDIO_VIDEO_LOUDSPEAKER);
-                manager.setBluetoothClass(deviceClass);
+                if(bluetoothManager!=null) {
+                    BluetoothConfigManager manager = BluetoothConfigManager.getInstance();
+                    BluetoothClass deviceClass = BluetoothClassFactory.build(
+                            BluetoothClass.Service.AUDIO,
+                            BluetoothClass.Device.AUDIO_VIDEO_LOUDSPEAKER);
+                    manager.setBluetoothClass(deviceClass);
+                }
             }
         }catch (Exception e){
             String[] infos = Utils.getAutoJumpLogInfos();
@@ -198,23 +200,29 @@ public abstract class BluetoothTool {
 
     public void findBuletoothDevice(){
         android.util.Log.d(TAG,"findBuletoothDevice");
+        try {
 // 设置广播信息过滤
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(BluetoothDevice.ACTION_FOUND);
-        intentFilter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
-        intentFilter.addAction(BluetoothAdapter.ACTION_SCAN_MODE_CHANGED);
-        intentFilter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
-        intentFilter.addAction(ACTION_CONNECTION_STATE_CHANGED);
-        intentFilter.addAction(A2dpSinkHelper.ACTION_PLAYING_STATE_CHANGED);
-        context.registerReceiver(receiver, intentFilter);
+            IntentFilter intentFilter = new IntentFilter();
+            intentFilter.addAction(BluetoothDevice.ACTION_FOUND);
+            intentFilter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
+            intentFilter.addAction(BluetoothAdapter.ACTION_SCAN_MODE_CHANGED);
+            intentFilter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
+            intentFilter.addAction(ACTION_CONNECTION_STATE_CHANGED);
+            intentFilter.addAction(A2dpSinkHelper.ACTION_PLAYING_STATE_CHANGED);
+            context.registerReceiver(receiver, intentFilter);
 // 寻找蓝牙设备，android会将查找到的设备以广播形式发出去
-        mBluetoothAdapter.startDiscovery();
-        mScanning = true;
-        bluetoothDeviceName=new HashMap<>();
-        BluetoothLeScanner mBluetoothLeScanner = mBluetoothAdapter.getBluetoothLeScanner();
-        mBluetoothLeScanner.startScan(scanCallback);
-        //Bluetooth low energy
-        mBluetoothAdapter.startLeScan(mLeScanCallback);
+            mBluetoothAdapter.startDiscovery();
+            mScanning = true;
+            bluetoothDeviceName = new HashMap<>();
+            if(mBluetoothAdapter!=null) {
+                BluetoothLeScanner mBluetoothLeScanner = mBluetoothAdapter.getBluetoothLeScanner();
+                mBluetoothLeScanner.startScan(scanCallback);
+                //Bluetooth low energy
+                mBluetoothAdapter.startLeScan(mLeScanCallback);
+            }
+        }catch (NullPointerException e){
+            e.printStackTrace();
+        }
 
     }
 

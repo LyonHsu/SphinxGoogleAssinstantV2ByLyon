@@ -17,9 +17,12 @@
 package com.example.androidthings.assistant;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -183,6 +186,7 @@ public class AssistantActivity extends AppCompatActivity implements Button.OnBut
         }else {
             setContentView(R.layout.activity_main);
             BlueToothInit();
+            setTitle(getString(R.string.app_name)+" Hot key:"+MainConstant.ACTIVATION_KEYPHRASE);
             textToSpeech= new TextToSpeech(context, new TextToSpeech.OnInitListener() {
                 @Override
                 public void onInit(int status) {
@@ -661,9 +665,8 @@ public class AssistantActivity extends AppCompatActivity implements Button.OnBut
 
             // TODO打開一盞燈！
             LEDShining();
+            mHandler.postDelayed(runnable,60*1000);
         }
-
-
     }
 
     @Override
@@ -773,6 +776,7 @@ public class AssistantActivity extends AppCompatActivity implements Button.OnBut
         //lets show a blue light to indicate we are ready.
 //        playDing(this);
         LEDShining=false;
+        mHandler.removeCallbacks(runnable);
         if(textToSpeech!=null) {
             LyonTextToSpeech.speak(context, textToSpeech, openComplete);
             Log.e(TAG,openComplete);
@@ -811,6 +815,24 @@ public class AssistantActivity extends AppCompatActivity implements Button.OnBut
                     playYoutube(0);
                     break;
             }
+        }
+    };
+
+    Runnable runnable = new Runnable() {
+        @Override
+        public void run() {
+            LEDShining = false;
+            AlertDialog.Builder builder = new AlertDialog.Builder(AssistantActivity.this);
+            builder.setTitle("Error");
+            builder.setMessage(R.string.system_error)
+                    .setNegativeButton(R.string.ok, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            // User cancelled the dialog
+                            dialog.dismiss();
+                        }
+                    });
+            AlertDialog alertDialog = builder.create();
+            alertDialog.show();
         }
     };
 
@@ -945,7 +967,7 @@ public class AssistantActivity extends AppCompatActivity implements Button.OnBut
             }
         };
         String bluetoothType = bluetoothTool.getBlueToothType(bluetoothTool.getBluetoothClass());
-        String blueDate = "bluetooth Name:" + bluetoothTool.getBluetoothName("Lyon Smart Box Pi3_" + Build.MODEL) + ",   Mac:" + bluetoothTool.getBluetoothMac();
+        String blueDate = "bluetooth Name:" + bluetoothTool.getBluetoothName(MainConstant.BlueToothName+" Pi3_" + Build.MODEL) + ",   Mac:" + bluetoothTool.getBluetoothMac();
         AppController.getInstance().setBluetoothTool(bluetoothTool);
         android.util.Log.d(TAG,"bluetooth:"+blueDate+" type:"+bluetoothType);
         bluetoothTool.findBuletoothDevice();

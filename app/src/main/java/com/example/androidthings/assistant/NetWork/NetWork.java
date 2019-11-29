@@ -159,7 +159,8 @@ public class NetWork extends RelativeLayout {
         try {
             jsonObject.put("IP", ip);
             jsonObject.put("SSID", wifiInf.getSSID());
-            AppController.getInstance().getBluetoothTool().bluetoothWrite(jsonObject);
+            if(AppController.getInstance().getBluetoothTool()!=null)
+                AppController.getInstance().getBluetoothTool().bluetoothWrite(jsonObject);
         } catch (JSONException e) {
             e.printStackTrace();
         }catch (NullPointerException e){

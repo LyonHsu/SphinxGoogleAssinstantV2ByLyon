@@ -29,4 +29,7 @@
     <string name="wificonnect">(CONNECT)</string>
     <string name="wifititle">wifi connect error</string>
     <string name="wifioffmassage">本功能需開啟無線網路才可進行下一步設定, 請確認是否要開啟無線網路?\n(Is turn on the wifi ?)</string>
+
+  <string name="system_error">語音系統初始化錯誤！請重新安裝設定！</string>
+  <string name="ok">確定</string>
 </resources>

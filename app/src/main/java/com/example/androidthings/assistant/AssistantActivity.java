@@ -104,7 +104,7 @@ public class AssistantActivity extends AppCompatActivity implements Button.OnBut
     private static final String TAG = AssistantActivity.class.getSimpleName();
 
     //Is Use Google AIY Device
-    public static boolean isGoogleAIY = false;
+    public static boolean isGoogleAIY = true;
 
 
     // Peripheral and drivers constants.
